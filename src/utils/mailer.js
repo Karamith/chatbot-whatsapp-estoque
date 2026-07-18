@@ -1,6 +1,7 @@
 const nodemailer = require('nodemailer');
 const config = require('../config');
 const jwt = require('jsonwebtoken');
+const path = require('path');
 
 // Criar o transporter apenas se as variaveis estiverem configuradas
 let transporter = null;
