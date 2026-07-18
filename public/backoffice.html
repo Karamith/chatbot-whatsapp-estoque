@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Condado - Backoffice</title>
+  <script>
+    // Autenticação Padrão
+    const token = localStorage.getItem('bo_token');
+    if (!token) {
+      window.location.href = 'bo-login.html';
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/bo-style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="bo-header">
+    <div class="bo-header-left">
+      <img src="/bo-assets/logo.png" alt="Comprint Logo" class="bo-logo">
+      <div class="bo-header-title">Services Team Flow</div>
+      
+      <!-- Botões I e II -->
+      <div class="bo-nav-group" style="margin-left: 32px;">
+        <button class="bo-nav-btn" id="btn-calc-ptax"><img src="/bo-assets/Calculadora.png" alt="Calculadora" class="nav-icon-img"> Calculadora PTAX</button>
+        <button class="bo-nav-btn" id="btn-menu-2"><img src="/bo-assets/clientes.png" alt="Clientes" class="nav-icon-img"> Clientes</button>
+      </div>
+    </div>
+    
+    <!-- Barra de Tempo (Expediente) -->
+    <div class="bo-timeline-container">
+      <span class="time-label">08:30</span>
+      <div class="timeline-track">
+        <div class="timeline-fill" id="timeline-progress">
+          <img src="/mascote.png" class="timeline-mascot" alt="Mascote">
+        </div>
+      </div>
+      <span class="time-label">17:30</span>
+    </div>
+
+    <div class="bo-header-right">
+      <!-- Botões III e IV -->
+      <div class="bo-nav-group" style="margin-right: 32px;">
+        <button class="bo-nav-btn" id="btn-menu-3"><img src="/bo-assets/Agenda.png" alt="Agenda" class="nav-icon-img"> Agenda</button>
+        <button class="bo-nav-btn" id="btn-menu-4" onclick="window.location.href='importacoes.html'"><span class="nav-icon">✈️</span> Importar</button>
+      </div>
+
+      <div class="bo-user-info">
+        <span class="bo-greeting">Boa tarde, Ricardo Almeida</span>
+        <img id="bo-user-avatar" src="/bo-assets/ricardoalmeida.jpeg" alt="Avatar" class="bo-avatar">
+      </div>
+    </div>
+  </header>
+
+  <!-- Kanban Board -->
+  <main class="kanban-board">
+    
+    <!-- Coluna 1: Pendente -->
+    <div class="kanban-column col-pendente">
+      <div class="column-header">
+        <div class="dot"></div>
+        <div class="column-title">Pendente</div>
+      </div>
+      <div class="column-body">
+        <!-- Cards will go here -->
+      </div>
+    </div>
+
+    <!-- Coluna 2: Em Análise -->
+    <div class="kanban-column col-analise">
+      <div class="column-header">
+        <div class="dot"></div>
+        <div class="column-title">Em Análise</div>
+      </div>
+      <div class="column-body">
+        <!-- Cards will go here -->
+      </div>
+    </div>
+
+    <!-- Coluna 3: Orçamento Enviado -->
+    <div class="kanban-column col-oenv">
+      <div class="column-header">
+        <div class="dot"></div>
+        <div class="column-title">O. Env.</div>
+      </div>
+      <div class="column-body">
+        <!-- Cards will go here -->
+      </div>
+    </div>
+
+    <!-- Coluna 4: Orçamento Aprovado -->
+    <div class="kanban-column col-oaprov">
+      <div class="column-header">
+        <div class="dot"></div>
+        <div class="column-title">O. Aprov.</div>
+      </div>
+      <div class="column-body">
+        <!-- Cards will go here -->
+      </div>
+    </div>
+
+    <!-- Coluna 5: Em Processamento -->
+    <div class="kanban-column col-separacao">
+      <div class="column-header">
+        <div class="dot" style="background-color: var(--color-separacao);"></div>
+        <div class="column-title">Em processamento</div>
+      </div>
+      <div class="column-body">
+        <!-- Cards will go here -->
+      </div>
+    </div>
+
+    <!-- Coluna 6: Finalizado -->
+    <div class="kanban-column col-finalizado">
+      <div class="column-header">
+        <div class="dot"></div>
+        <div class="column-title">Finalizado</div>
+      </div>
+      <div class="column-body">
+        <!-- Cards will go here -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Gaveta da Calculadora PTAX -->
+  <div id="calc-drawer" class="calc-drawer">
+    <div class="calc-header">
+      <div class="calc-title">
+        <img src="/bo-assets/Calculadora.png" alt="Calc Icon">
+        <h2>Calculadora PTAX</h2>
+      </div>
+      <button id="calc-close-btn" class="calc-close">&times;</button>
+    </div>
+    
+    <div class="calc-body">
+      <!-- Loading State -->
+      <div id="calc-loading" class="calc-loading">
+        <div class="spinner"></div>
+        <span>Buscando PTAX do BCB...</span>
+      </div>
+
+      <!-- Formulário de Cálculo -->
+      <div id="calc-content" class="calc-content hidden">
+        <div class="calc-ptax-info">
+          <span>PTAX Atualizada:</span>
+          <strong id="ptax-date-display">--/--/----</strong>
+        </div>
+
+        <div class="calc-group">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label>Valor FOB</label>
+            <div id="abg-currency-selector" class="hidden" style="display: flex; gap: 8px;">
+              <label class="abg-currency-btn">
+                <input type="radio" name="abg-curr" value="EUR" checked>
+                <span>EUR</span>
+              </label>
+              <label class="abg-currency-btn">
+                <input type="radio" name="abg-curr" value="GBP">
+                <span>GBP</span>
+              </label>
+            </div>
+          </div>
+          <input type="number" id="calc-fob" placeholder="0.00" step="0.01">
+        </div>
+
+        <div class="calc-row">
+          <div class="calc-group">
+            <label>Moeda</label>
+            <select id="calc-currency">
+              <option value="USD">USD - Dólar</option>
+              <option value="EUR">EUR - Euro</option>
+              <option value="GBP">GBP - Libra</option>
+            </select>
+          </div>
+          <div class="calc-group">
+            <label>Modalidade</label>
+            <select id="calc-mode">
+              <option value="pronta-entrega">Pronta Entrega</option>
+              <option value="importacao">Importação</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="calc-group">
+          <label>Fator de Multiplicação</label>
+          <select id="calc-factor">
+            <option value="1.00">Neutro (1.00)</option>
+            <option value="1.20">Contrato (1.20)</option>
+            <option value="4.00">Venda (4.00)</option>
+            <option value="6.00">Venda (6.00)</option>
+            <option value="8.00">Venda (8.00)</option>
+            <option value="10.00">Venda (10.00)</option>
+          </select>
+        </div>
+
+        <button id="calc-submit-btn" class="calc-submit">Calcular Valor Final</button>
+
+        <!-- Painel de Resultado -->
+        <div id="calc-result-panel" class="calc-result hidden">
+          <h4>Valor de Venda</h4>
+          <h2 id="calc-final-value">R$ 0,00</h2>
+          
+          <div class="calc-details">
+            <div class="detail-row">
+              <span>FOB Ajustado</span>
+              <strong id="calc-detail-fob">-</strong>
+            </div>
+            <div class="detail-row">
+              <span id="calc-rate-label">PTAX Média</span>
+              <strong id="calc-detail-rate">-</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toggle ABG no rodapé da calculadora -->
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-start;">
+          <label class="abg-toggle" title="Ativar conversão ABG (EUR/GBP para USD)">
+            <input type="checkbox" id="calc-abg-toggle">
+            <span>MODO ABG</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gaveta do Painel de Clientes -->
+  <div id="clientes-drawer" class="calc-drawer clientes-drawer">
+    <div class="calc-header">
+      <div class="calc-title">
+        <img src="/bo-assets/clientes.png" alt="Clientes Icon">
+        <h2>Painel de Clientes</h2>
+      </div>
+      <button id="clientes-close-btn" class="calc-close">&times;</button>
+    </div>
+    
+    <div class="calc-body" style="padding: 0; overflow: hidden;">
+      <iframe src="/clientes-sandbox.html" style="width:100%; height:100%; border:none;"></iframe>
+    </div>
+  </div>
+
+
+  <script>
+    // Saudação dinâmica baseada no JWT do usuário logado
+    function parseJwtPayload(token) {
+      try {
+        const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(atob(base64));
+      } catch (e) { return null; }
+    }
+
+    const hour = new Date().getHours();
+    let greeting = 'Boa noite';
+    if (hour >= 5 && hour < 12) greeting = 'Bom dia';
+    else if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
+
+    let nomeUsuario = 'Usuário';
+    const jwtPayload = parseJwtPayload(localStorage.getItem('bo_token') || '');
+    if (jwtPayload && jwtPayload.usuario) {
+      // Extrai o nome do email: ricardo.almeida@comprint.com.br → Ricardo Almeida
+      nomeUsuario = jwtPayload.usuario
+        .split('@')[0]
+        .split('.')
+        .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+        .join(' ');
+      
+      // Atualiza o avatar do header com a rota inteligente de avatares
+      const avatarEl = document.getElementById('bo-user-avatar');
+      if (avatarEl) {
+        avatarEl.src = `/api/avatar/${encodeURIComponent(nomeUsuario)}`;
+      }
+    }
+    document.querySelector('.bo-greeting').textContent = `${greeting}, ${nomeUsuario}`;
+
+    // Lógica da Timeline do Expediente (08:30 às 17:30)
+    function updateTimeline() {
+      const now = new Date();
+      const nowMinutes = (now.getHours() * 60) + now.getMinutes();
+      
+      const startMinutes = (8 * 60) + 30; // 08:30
+      const endMinutes = (17 * 60) + 30; // 17:30
+      const totalMinutes = endMinutes - startMinutes;
+      
+      let elapsedMinutes = nowMinutes - startMinutes;
+      
+      // Limites visuais (antes das 08:30 é 0%, depois das 17:30 é 100%)
+      if (nowMinutes < startMinutes) elapsedMinutes = 0;
+      if (nowMinutes >= endMinutes) elapsedMinutes = totalMinutes;
+      
+      const percentage = (elapsedMinutes / totalMinutes) * 100;
+      document.getElementById('timeline-progress').style.width = percentage + '%';
+    }
+    
+    updateTimeline();
+    setInterval(updateTimeline, 60000); // Atualiza a cada 1 minuto
+
+    // Lógica da Gaveta de Clientes
+    const btnClientes = document.getElementById('btn-menu-2');
+    const drawerClientes = document.getElementById('clientes-drawer');
+    const btnCloseClientes = document.getElementById('clientes-close-btn');
+
+    btnClientes.addEventListener('click', () => {
+      drawerClientes.classList.add('open');
+    });
+
+    btnCloseClientes.addEventListener('click', () => {
+      drawerClientes.classList.remove('open');
+    });
+
+    // Ouve a mensagem do iframe para fechar a gaveta quando clicar no botão Voltar lá dentro
+    window.addEventListener('message', (event) => {
+      if (event.data === 'closeClientesDrawer') {
+        drawerClientes.classList.remove('open');
+      }
+    });
+  </script>
+  
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/calculadora.js"></script>
+  <script src="js/kanban.js"></script>
+</body>
+</html>

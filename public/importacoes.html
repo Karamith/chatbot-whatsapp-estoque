@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Condado - Importações</title>
+  <script>
+    const token = localStorage.getItem('bo_token');
+    if (!token) {
+      window.location.href = 'bo-login.html';
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/bo-style.css">
+  <style>
+    .importacoes-container {
+      padding: 20px 40px;
+      color: #E2E8F0;
+    }
+    .importacoes-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: var(--bg-card);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    .importacoes-table th, .importacoes-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .importacoes-table th {
+      background: var(--bg-panel);
+      font-weight: 600;
+      color: #9CA3AF;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    .importacoes-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .btn-voltar {
+      background: #374151;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-voltar:hover {
+      background: #4B5563;
+    }
+    .pecas-list {
+      margin: 0;
+      padding-left: 16px;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body style="background: var(--bg-dark); margin: 0; font-family: 'Inter', sans-serif;">
+
+  <header class="bo-header">
+    <div class="bo-header-left">
+      <img src="/bo-assets/logo.png" alt="Comprint Logo" class="bo-logo">
+      <div class="bo-header-title">Painel de Importação</div>
+    </div>
+    <div class="bo-header-right">
+      <button class="btn-voltar" onclick="window.location.href='backoffice.html'">
+        ⬅️ Voltar ao Kanban
+      </button>
+    </div>
+  </header>
+
+  <main class="importacoes-container">
+    <h2>Pedidos Aguardando Importação</h2>
+    <p style="color: #9CA3AF; font-size: 0.9rem;">Esta lista contém todas as peças que foram direcionadas para o status de Importação a partir do Kanban.</p>
+
+    <table class="importacoes-table">
+      <thead>
+        <tr>
+          <th>ID Pedido</th>
+          <th>Cliente / Máquina</th>
+          <th>Técnico</th>
+          <th>Peças Solicitadas</th>
+          <th>Status Atual</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="importacoes-body">
+        <!-- Linhas geradas via JS -->
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    function carregarImportacoes() {
+      fetch('/api/pedidos', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        const importacoes = data.filter(p => p.status_pedido === 'IMPORTACAO');
+        const tbody = document.getElementById('importacoes-body');
+        
+        if (importacoes.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 30px; color: #9CA3AF;">Nenhum pedido em importação.</td></tr>';
+          return;
+        }
+
+        importacoes.forEach(pedido => {
+          const tr = document.createElement('tr');
+          
+          let pecasHtml = '<ul class="pecas-list">';
+          if (pedido.itens && pedido.itens.length > 0) {
+            pedido.itens.forEach(i => {
+              pecasHtml += `<li><b>${i.codigo_peca}</b> - ${i.descricao_peca || ''} (Qtd: ${i.quantidade})</li>`;
+            });
+          } else {
+            pecasHtml += '<li>Sem itens</li>';
+          }
+          pecasHtml += '</ul>';
+
+          tr.innerHTML = `
+            <td>#PD-${String(pedido.id).padStart(4, '0')}</td>
+            <td>
+              <div style="font-weight: 600;">${pedido.cliente}</div>
+              <div style="font-size: 0.8rem; color: #9CA3AF;">${pedido.modelo || 'N/A'}</div>
+            </td>
+            <td>${pedido.tecnico_nome}</td>
+            <td>${pecasHtml}</td>
+            <td>
+              <span style="background: #F59E0B; color: #000; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">Em Importação</span>
+            </td>
+            <td>
+              <button onclick="retornarParaKanban(${pedido.id})" style="background: #10B981; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.75rem; white-space: nowrap;">✔️ Peças Chegaram</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(err => console.error('Erro ao buscar pedidos de importação:', err));
+    }
+
+    document.addEventListener('DOMContentLoaded', carregarImportacoes);
+
+    window.retornarParaKanban = function(id) {
+      if (confirm("As peças chegaram? O pedido retornará para o Kanban na coluna EM PROCESSAMENTO.")) {
+        fetch(`/api/pedidos/${id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ status: 'EM_PROCESSAMENTO' })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            carregarImportacoes(); // recarrega a lista
+          } else {
+            alert('Erro ao atualizar o pedido.');
+          }
+        })
+        .catch(err => console.error(err));
+      }
+    };
+  </script>
+</body>
+</html>

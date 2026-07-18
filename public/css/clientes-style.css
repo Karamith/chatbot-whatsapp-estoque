@@ -1,0 +1,253 @@
+:root {
+  --bg-dark: #07090D;
+  --panel-bg: rgba(255, 255, 255, 0.03);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --neon-red: #ff2222;
+  --neon-red-glow: rgba(255, 34, 34, 0.4);
+  --text-main: #ffffff;
+  --text-muted: #8892b0;
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Tudo deve caber em uma tela */
+  padding: 20px;
+}
+
+/* =========================================================
+   HEADER (TOPO) - Ocupa o espaço sobressalente
+   ========================================================= */
+.sandbox-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+}
+
+.header-left, .header-right, .header-center {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.header-left {
+  gap: 15px;
+  color: var(--neon-red);
+}
+
+.header-right {
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.header-center {
+  justify-content: center;
+}
+
+.header-center h1 {
+  color: #fff;
+  font-size: 1.8rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(255, 34, 34, 0.6); /* Glow mais suave */
+  font-weight: 900;
+}
+
+.header-btn {
+  background: transparent;
+  border: 1px solid var(--neon-red);
+  color: var(--neon-red);
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.header-btn:hover {
+  background: rgba(255, 34, 34, 0.1);
+  box-shadow: 0 0 10px var(--neon-red-glow);
+}
+
+/* =========================================================
+   ÁREA SUPERIOR (GRID DE CLIENTES)
+   ========================================================= */
+.clients-grid-container {
+  flex: 0 0 auto;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  padding: 15px;
+  display: grid;
+  grid-template-rows: repeat(6, 45px); /* 6 linhas fixas para acomodar 54 clientes em 9 colunas */
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column; /* Força ordem alfabética por coluna */
+  gap: 8px;
+  margin-bottom: 20px;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.client-btn {
+  background: rgba(255, 255, 255, 0.05); /* Fundo preto/cinza padrão */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Borda neutra */
+  color: var(--text-muted); /* Texto neutro */
+  border-radius: 6px;
+  padding: 2px 5px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.client-btn:hover {
+  background: transparent;
+  color: #fff;
+  border-color: var(--neon-red);
+  box-shadow: 0 0 10px var(--neon-red-glow); /* Contorno em vermelho neon */
+}
+
+.client-btn.active {
+  background: rgba(255, 34, 34, 0.1); /* Bem de leve só pra demarcar */
+  color: #fff;
+  border-color: var(--neon-red);
+  box-shadow: 0 0 15px var(--neon-red-glow);
+}
+
+/* =========================================================
+   ÁREA INFERIOR (DASHBOARD)
+   ========================================================= */
+.dashboard-panel {
+  flex: 1; /* Estica para preencher todo o vazio da tela */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.dash-banner {
+  background: transparent; /* Apenas fundo transparente como antes */
+  border: 1px solid var(--neon-red); /* Contorno em vermelho */
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--neon-red);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  box-shadow: 0 0 10px var(--neon-red-glow);
+  flex: 0 0 auto;
+}
+
+.dash-content {
+  display: flex;
+  gap: 15px;
+  flex: 1; /* Expande para preencher o resto do dashboard */
+}
+
+.dash-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.dash-card {
+  flex: 1; /* Estica os cards individualmente para preencher a coluna */
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.dash-card h4 {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.dash-card h2 {
+  font-size: 1.3rem;
+  color: #fff;
+}
+
+/* Gauge Chart */
+.gauge-card {
+  flex: 1.2;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  backdrop-filter: blur(10px);
+}
+
+.gauge-title {
+  position: absolute;
+  top: 15px;
+  color: var(--neon-red);
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+/* Progress Bar */
+.progress-container {
+  width: 100%;
+  height: 25px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #00ff80; /* verde padrão */
+  border-radius: 12px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.8s ease;
+  box-shadow: inset 0 0 5px rgba(255,255,255,0.3);
+}
+
+.gauge-value {
+  position: absolute;
+  bottom: 5px;
+  font-size: 1.2rem;
+  color: var(--neon-red);
+  font-weight: bold;
+}
+

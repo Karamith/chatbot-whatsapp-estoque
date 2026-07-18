@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Serviços</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+  
+  <div class="background-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <main class="dashboard">
+    <header class="header">
+      <div class="title-area">
+        <div class="logo-title-wrapper">
+          <img src="logo.png" alt="Comprint Logo" class="comprint-logo">
+          <h1>Services Center</h1>
+        </div>
+        <p>Services Team Real Time</p>
+      </div>
+      <div class="header-controls">        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('overview')"><i class="ph ph-squares-four"></i> Visão Geral</button>
+          <button class="tab-btn" onclick="switchTab('database', event)"><i class="ph ph-database"></i> Base de Solicitações</button>
+          <button class="tab-btn" onclick="switchTab('jigs', event)"><i class="ph ph-wrench"></i> Controle de JIGs</button>
+          <button class="tab-btn" onclick="switchTab('instalacoes', event)"><i class="ph ph-calendar-check"></i> Instalações</button>
+          <button class="tab-btn" onclick="switchTab('reposicoes', event)"><i class="ph ph-package"></i> Reposições</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Barra de Progresso do Expediente -->
+    <div class="workday-progress-container">
+      <div class="workday-track">
+        <div class="workday-fill" id="workday-fill"></div>
+        <div class="mascot-container" id="mascot-container">
+          <div class="mascot-speech" id="mascot-speech" style="display: none;">Até amanhã!</div>
+          <img src="mascote.png" alt="Mascote" class="mascot-img">
+        </div>
+      </div>
+      <div class="workday-labels">
+        <span>08:30</span>
+        <span class="pulse-expediente" id="status-expediente">Expediente em Andamento</span>
+        <span>17:30</span>
+      </div>
+    </div>
+
+    <!-- TAB: VISÃO GERAL -->
+    <div id="tab-overview" class="tab-pane active">
+      
+      <!-- Ticker de Máquina Parada (MD) -->
+      <div id="md-ticker-container" class="ticker-wrapper" style="display: none;">
+        <div class="ticker-label">🚨 URGENTE: MÁQUINA PARADA</div>
+        <div class="ticker-track">
+          <div id="md-ticker-content" class="ticker-content"></div>
+        </div>
+      </div>
+
+      <div class="kpi-row" style="grid-template-columns: repeat(5, 1fr);">
+        <!-- Hoje -->
+        <div class="card glass">
+          <div class="card-icon">📥</div>
+          <div class="card-content">
+            <h3 class="card-title">Pedidos Hoje</h3>
+            <p class="card-value" id="val-total-hoje">0</p>
+            <span class="card-label">Volume do dia</span>
+          </div>
+        </div>
+
+        <!-- Fila -->
+        <div class="card glass highlight-card">
+          <div class="card-icon">⏳</div>
+          <div class="card-content">
+            <h3 class="card-title">Pedidos</h3>
+            <p class="card-value highlight-value" id="val-total-fila">0</p>
+            <span class="card-label pulse-text">Aguardando atendimento</span>
+          </div>
+        </div>
+        
+        <!-- MD -->
+        <div class="card glass md-alert">
+          <div class="card-icon">🚨</div>
+          <div class="card-content">
+            <h3 class="card-title" style="color: #ef4444;">Máquina Parada</h3>
+            <p class="card-value" id="val-total-md" style="color: #ef4444;">0</p>
+            <span class="card-label" style="color: #fca5a5;">Urgentes na fila</span>
+          </div>
+        </div>
+
+        <!-- Volume Peças -->
+        <div class="card glass">
+          <div class="card-icon">⚙️</div>
+          <div class="card-content">
+            <h3 class="card-title">Volume de Peças</h3>
+            <p class="card-value" id="val-total-pecas">0</p>
+            <span class="card-label">Últimos 30 Dias</span>
+          </div>
+        </div>
+
+        <!-- Total Solicitado -->
+        <div class="card glass">
+          <div class="card-icon">📦</div>
+          <div class="card-content">
+            <h3 class="card-title">Total Solicitado</h3>
+            <p class="card-value" id="val-total-pedidos">0</p>
+            <span class="card-label">Histórico Completo</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Segunda Linha de Cards (Kanban) -->
+      <div class="kpi-row" style="display: grid; grid-template-columns: repeat(6, 1fr);">
+        <div class="card glass has-tooltip" style="border-top: 3px solid #ef4444;">
+          <div class="card-content">
+            <h3 class="card-title">Pendentes</h3>
+            <p class="card-value" id="val-pendentes">0</p>
+          </div>
+          <div class="tooltip-content" id="tt-pendentes">Nenhum pedido</div>
+        </div>
+
+        <div class="card glass has-tooltip" style="border-top: 3px solid #f59e0b;">
+          <div class="card-content">
+            <h3 class="card-title">Em Análise</h3>
+            <p class="card-value" id="val-analise">0</p>
+          </div>
+          <div class="tooltip-content" id="tt-analise">Nenhum pedido</div>
+        </div>
+
+        <div class="card glass has-tooltip" style="border-top: 3px solid #3b82f6;">
+          <div class="card-content">
+            <h3 class="card-title">Enviados</h3>
+            <p class="card-value" id="val-enviados">0</p>
+          </div>
+          <div class="tooltip-content" id="tt-enviados">Nenhum pedido</div>
+        </div>
+
+        <div class="card glass has-tooltip" style="border-top: 3px solid #10b981;">
+          <div class="card-content">
+            <h3 class="card-title">Aprovados</h3>
+            <p class="card-value" id="val-aprovados">0</p>
+          </div>
+          <div class="tooltip-content" id="tt-aprovados">Nenhum pedido</div>
+        </div>
+
+        <div class="card glass has-tooltip" style="border-top: 3px solid #8b5cf6;">
+          <div class="card-content">
+            <h3 class="card-title">Em Processamento</h3>
+            <p class="card-value" id="val-processamento">0</p>
+          </div>
+          <div class="tooltip-content" id="tt-processamento">Nenhum pedido</div>
+        </div>
+
+        <div class="card glass has-tooltip" style="border-top: 3px solid #64748b;">
+          <div class="card-content">
+            <h3 class="card-title">Finalizados</h3>
+            <p class="card-value" id="val-finalizados">0</p>
+          </div>
+          <div class="tooltip-content" id="tt-finalizados">Nenhum pedido</div>
+        </div>
+      </div>
+
+      <div class="panels-grid">
+        <div class="panel glass">
+          <div class="panel-header">
+            <h2>Top Peças Solicitadas</h2>
+          </div>
+          <div class="panel-body">
+            <ul class="ranking-list" id="list-top-pecas">
+              <li>Carregando...</li>
+            </ul>
+          </div>
+        </div>
+        <div class="panel glass">
+          <div class="panel-header">
+            <h2>Maiores Clientes (Volume)</h2>
+          </div>
+          <div class="panel-body">
+            <ul class="ranking-list" id="list-top-clientes">
+              <li>Carregando...</li>
+            </ul>
+          </div>
+        </div>
+        <div class="panel glass" style="border-top: 3px solid #ef4444;">
+          <div class="panel-header">
+            <h2>Pendentes</h2>
+          </div>
+          <div class="panel-body">
+            <ul class="ranking-list" id="list-pedidos-pendentes">
+              <li>Carregando...</li>
+            </ul>
+          </div>
+        </div>
+        <div class="panel glass" style="border-top: 3px solid #f59e0b;">
+          <div class="panel-header">
+            <h2>Em Análise</h2>
+          </div>
+          <div class="panel-body">
+            <ul class="ranking-list" id="list-pedidos-em-analise">
+              <li>Carregando...</li>
+            </ul>
+          </div>
+        </div>
+        <div class="panel glass" style="border-top: 3px solid #10b981;">
+          <div class="panel-header">
+            <h2>NF Emitida</h2>
+          </div>
+          <div class="panel-body">
+            <ul class="ranking-list" id="list-nf-emitida">
+              <li>Carregando...</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: BASE DE DADOS (NOVA) -->
+    <div id="tab-database" class="tab-pane" style="display: none;">
+      <div class="panel-header" style="border: none; background: transparent; padding: 0 0 20px 0;">
+        <h2>Base de Solicitações</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Histórico completo de todas as solicitações</p>
+      </div>
+      
+      <!-- Filtros -->
+      <div class="panel glass" style="margin-bottom: 2rem;">
+        <div class="panel-body" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
+          <div class="filter-group">
+            <label>Período (Início)</label>
+            <input type="date" id="filter-date-start" class="filter-input">
+          </div>
+          <div class="filter-group">
+            <label>Período (Fim)</label>
+            <input type="date" id="filter-date-end" class="filter-input">
+          </div>
+          <div class="filter-group">
+            <label>Técnico</label>
+            <select id="filter-tecnico" class="filter-input">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Cliente</label>
+            <select id="filter-cliente" class="filter-input">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Equipamento</label>
+            <select id="filter-equipamento" class="filter-input">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div class="filter-group" style="display: flex; gap: 15px; margin-bottom: 10px;">
+            <label class="checkbox-label">
+              <input type="checkbox" id="filter-md"> Somente MD
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="filter-diagnostico"> Somente Diagnóstico
+            </label>
+          </div>
+          <div class="filter-group" style="margin-left: auto;">
+            <button onclick="limparFiltrosBD()" class="btn-secondary"><i class="ph ph-eraser"></i> Limpar Filtros</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela Base de Dados -->
+      <div class="panel glass">
+        <div class="panel-body" style="padding: 0;">
+          <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+            <table class="data-table" style="min-width: 1400px;">
+              <thead style="position: sticky; top: 0; background: var(--bg-color); z-index: 10;">
+                <tr>
+                  <th style="width: 5%;">ID</th>
+                  <th style="width: 8%;">Data</th>
+                  <th style="width: 10%;">Técnico</th>
+                  <th style="width: 12%;">Cliente</th>
+                  <th style="width: 12%;">Equipamento</th>
+                  <th style="width: 12%;">Peça Solicitada</th>
+                  <th style="width: 3%;">Qtd</th>
+                  <th style="width: 8%;">Orçamento</th>
+                  <th style="width: 8%;">Pedido</th>
+                  <th style="width: 8%;">NF</th>
+                  <th style="width: 14%;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="table-database-body">
+                <tr><td colspan="8" style="text-align:center;">Carregando Base de Dados...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CONTROLE DE JIGS -->
+    <div id="tab-jigs" class="tab-pane" style="display: none;">
+      <div class="panel-header" style="border: none; background: transparent; padding: 0 0 20px 0;">
+        <h2>Inventário e Posse de JIGs</h2>
+      </div>
+      <div class="panel-body" style="padding: 0;">
+        <div class="kpi-row" style="margin-bottom: 2rem;">
+          <!-- JIGs -->
+          <div class="card glass highlight-card">
+            <div class="card-icon">🔧</div>
+            <div class="card-content">
+              <h3 class="card-title">JIGs em Campo</h3>
+              <p class="card-value" id="val-jigs">0</p>
+              <span class="card-label">Emprestados Atualmente</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="panel glass">
+          <div class="panel-header">
+            <h2>Tabela de JIGs</h2>
+          </div>
+          <div class="panel-body" style="padding: 0;">
+            <div class="table-responsive">
+              <table class="data-table" style="min-width: 1400px;">
+                <thead>
+                  <tr>
+                    <th style="width: 10%;">Código</th>
+                    <th style="width: 45%;">Descrição</th>
+                    <th style="width: 10%;">Status</th>
+                    <th style="width: 15%;">Técnico Responsável</th>
+                    <th style="width: 20%;">Cliente</th>
+                  </tr>
+                </thead>
+                <tbody id="table-jigs-body">
+                  <tr><td colspan="5" style="text-align:center;">Carregando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CRONOGRAMA DE INSTALAÇÕES -->
+    <div id="tab-instalacoes" class="tab-pane" style="display: none;">
+      <div class="panel-header" style="border: none; background: transparent; padding: 0 0 20px 0;">
+        <h2>Cronograma de Instalações</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Visão Geral e Linha do Tempo</p>
+      </div>
+      
+      <!-- Cards de Resumo -->
+      <div class="kpi-row" style="margin-bottom: 2rem;">
+        <div class="card glass">
+          <div class="card-icon">📅</div>
+          <div class="card-content">
+            <h3 class="card-title">Programadas</h3>
+            <p class="card-value" id="count-programadas">0</p>
+          </div>
+        </div>
+        <div class="card glass highlight-card">
+          <div class="card-icon">🚀</div>
+          <div class="card-content">
+            <h3 class="card-title">Em Andamento</h3>
+            <p class="card-value highlight-value" id="count-andamento">0</p>
+          </div>
+        </div>
+        <div class="card glass">
+          <div class="card-icon">✅</div>
+          <div class="card-content">
+            <h3 class="card-title">Concluídas</h3>
+            <p class="card-value" id="count-finalizadas">0</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela de Instalações -->
+      <div class="panel glass">
+        <div class="panel-header">
+          <h2>Lista de Instalações</h2>
+        </div>
+        <div class="panel-body" style="padding: 0;">
+          <div class="table-responsive">
+            <table class="data-table" style="min-width: 1300px;">
+              <thead>
+                <tr>
+                  <th style="width: 15%;">Cliente</th>
+                  <th style="width: 15%;">Equipamento</th>
+                  <th style="width: 33%; min-width: 350px;">Andamento</th>
+                  <th style="width: 25%;">Técnicos</th>
+                  <th style="width: 12%; text-align: center;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="table-instalacoes-body">
+                <tr><td colspan="5" style="text-align:center;">Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: REPOSIÇÕES PENDENTES -->
+    <div id="tab-reposicoes" class="tab-pane" style="display: none;">
+      <div class="panel-header" style="border: none; background: transparent; padding: 0 0 20px 0; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2>Pedidos de Reposição Pendentes</h2>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">Contratos CIF e Carepack pendentes de solicitação pelos técnicos.</p>
+        </div>
+        <button onclick="baixarCSVReposicoes()" style="padding: 10px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold;">
+          📥 Baixar CSV
+        </button>
+      </div>
+
+      <div class="panel glass">
+        <div class="panel-body" style="padding: 0;">
+          <div class="table-responsive">
+            <table class="data-table" style="min-width: 1000px;">
+              <thead>
+                <tr>
+                  <th style="width: 10%;">Atraso</th>
+                  <th style="width: 20%;">Técnico</th>
+                  <th style="width: 20%;">Cliente</th>
+                  <th style="width: 25%;">Peça</th>
+                  <th style="width: 10%;">Qtd</th>
+                  <th style="width: 15%;">Contrato</th>
+                </tr>
+              </thead>
+              <tbody id="table-reposicoes-body">
+                <tr><td colspan="6" style="text-align:center;">Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/app.js?v=3"></script>
+</body>
+</html>

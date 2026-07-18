@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Condado - Login Backoffice</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/bo-style.css">
+</head>
+<body class="login-body">
+
+  <!-- Background para exibição aleatória dos logos das representadas -->
+  <div id="partner-logos-container" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; overflow: hidden; pointer-events: none;">
+    <div id="partner-logo" style="
+      position: absolute; 
+      opacity: 0; 
+      transition: opacity 1.5s ease-in-out; 
+      width: 300px; 
+      height: 300px; 
+      border-radius: 50%; 
+      background-color: #FFFFFF;
+      background-size: 65%;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    "></div>
+  </div>
+
+  <div class="login-container" style="z-index: 10; position: relative;">
+    <div class="login-header">
+      <img src="/bo-assets/logo.png" alt="Comprint Logo" style="max-height: 80px; margin-bottom: 16px;">
+      <h2>Services Team Backoffice</h2>
+    </div>
+    
+    <form class="login-form" id="loginForm">
+      <div class="form-group">
+        <label for="email">E-mail Corporativo</label>
+        <input type="email" id="email" placeholder="nome@comprint.com.br" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn-primary">Entrar no Sistema</button>
+    </form>
+  </div>
+
+  <!-- Modal visual de troca de senha (oculto por padrão) -->
+  <div class="modal-overlay" id="passwordModal" style="display: none; z-index: 999;">
+    <div class="modal-box">
+      <h3>Bem-vindo ao Condado!</h3>
+      <p class="modal-desc">Este é o seu primeiro acesso. Por questões de segurança, você precisa criar uma nova senha numérica de 8 dígitos para o seu usuário operacional.</p>
+      
+      <form id="newPasswordForm" class="modal-form">
+        <div class="form-group">
+          <label>Nova Senha (8 dígitos)</label>
+          <input type="password" maxlength="8" pattern="[0-9]{8}" placeholder="Ex: 12345678" required>
+        </div>
+        <div class="form-group">
+          <label>Confirmar Nova Senha</label>
+          <input type="password" maxlength="8" pattern="[0-9]{8}" placeholder="Repita a senha" required>
+        </div>
+        <button type="button" class="btn-primary">Salvar e Acessar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Lógica para logos de representadas aleatórios no background
+    const logos = [
+      'ABG.png', 'AGFA.png', 'Berhalter.webp', 'HP.jpg', 
+      'Hitachi.png', 'Karville.png', 'MGI.jpg', 'Stratasys.png', 'komfi.png'
+    ];
+    
+    const logoImg = document.getElementById('partner-logo');
+    
+    function showRandomLogo() {
+      // Escolhe logo aleatório
+      const randomLogo = logos[Math.floor(Math.random() * logos.length)];
+      
+      // Cria imagem em memória apenas para checar o onload
+      const tempImg = new Image();
+      tempImg.src = `/bo-assets/Logo/${randomLogo}`;
+      
+      // Espera imagem carregar
+      tempImg.onload = () => {
+        logoImg.style.backgroundImage = `url('/bo-assets/Logo/${randomLogo}')`;
+        
+        const logoSize = 300;
+        const loginWidth = 450; // largura do modal central (400) + um respiro
+        const center = window.innerWidth / 2;
+        
+        // Decide aleatoriamente se vai aparecer no lado esquerdo ou direito
+        const side = Math.random() > 0.5 ? 'left' : 'right';
+        
+        let minX, maxX;
+        
+        if (side === 'left') {
+          // Lado esquerdo: do início (0) até o começo do modal central
+          minX = 20; // margem
+          maxX = Math.max(minX, center - (loginWidth / 2) - logoSize - 20);
+        } else {
+          // Lado direito: do fim do modal central até o final da tela
+          minX = center + (loginWidth / 2) + 20;
+          maxX = Math.max(minX, window.innerWidth - logoSize - 20);
+        }
+        
+        const maxY = Math.max(0, window.innerHeight - logoSize - 20);
+        
+        // Sorteia o X dentro dos limites do lado escolhido
+        let randomX = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+        let randomY = Math.floor(Math.random() * maxY);
+        
+        logoImg.style.left = `${randomX}px`;
+        logoImg.style.top = `${randomY}px`;
+        
+        // Fade in com cores originais e brilho
+        logoImg.style.opacity = '1'; 
+        
+        // Espera 3 segundos, depois fade out
+        setTimeout(() => {
+          logoImg.style.opacity = '0';
+        }, 3000);
+      };
+    }
+
+    // Inicia o ciclo: 3s visível, 1.5s transição out, 1s pausa = 5.5s ciclo
+    showRandomLogo();
+    setInterval(showRandomLogo, 5500);
+
+    // Login Logic
+    const loginForm = document.getElementById('loginForm');
+    const passwordModal = document.getElementById('passwordModal');
+    const newPasswordForm = document.getElementById('newPasswordForm');
+    const btnSavePassword = newPasswordForm.querySelector('.btn-primary');
+    let currentUserEmail = '';
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario: email, senha: password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          if (data.firstAccess) {
+            currentUserEmail = email;
+            passwordModal.style.display = 'flex';
+          } else {
+            localStorage.setItem('bo_token', data.token);
+            window.location.href = 'backoffice.html';
+          }
+        } else {
+          alert(data.error || 'Erro no login');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao conectar com o servidor.');
+      }
+    });
+
+    btnSavePassword.addEventListener('click', async () => {
+      const inputs = newPasswordForm.querySelectorAll('input[type="password"]');
+      const newPassword = inputs[0].value;
+      const confirmPassword = inputs[1].value;
+
+      if (newPassword !== confirmPassword) {
+        return alert('As senhas não coincidem!');
+      }
+      if (newPassword.length !== 8) {
+        return alert('A senha deve ter exatamente 8 dígitos!');
+      }
+
+      try {
+        const res = await fetch('/api/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario: currentUserEmail, novaSenha: newPassword })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          localStorage.setItem('bo_token', data.token);
+          alert('Senha alterada com sucesso!');
+          window.location.href = 'backoffice.html';
+        } else {
+          alert(data.error || 'Erro ao alterar senha');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao conectar com o servidor.');
+      }
+    });
+  </script>
+</body>
+</html>

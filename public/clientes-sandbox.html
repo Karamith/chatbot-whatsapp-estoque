@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Clientes - Sandbox</title>
+  <link rel="stylesheet" href="css/clientes-style.css?v=9">
+</head>
+<body>
+
+  <!-- HEADER (Topo) -->
+  <header class="sandbox-header">
+    <!-- Esquerda: Logo e Services Team -->
+    <div class="header-left">
+      <img src="/logo.png" alt="Comprint Logo" style="height:90px; object-fit:contain; filter: invert(1) hue-rotate(180deg) saturate(3);">
+      <h2 style="color: white; font-size: 1.8rem; font-weight: bold; margin-left: 15px; text-shadow: 0 0 10px rgba(255,255,255,0.5);">Services Team</h2>
+    </div>
+    
+    <!-- Centro: Título -->
+    <div class="header-center">
+      <h1>PAINEL DE CONTRATOS</h1>
+    </div>
+
+    <!-- Direita: Botões -->
+    <div class="header-right">
+      <button class="header-btn">Atualizar</button>
+      <button class="header-btn">Voltar</button>
+    </div>
+  </header>
+
+  <!-- GRID DE CLIENTES (Área Superior) -->
+  <div class="clients-grid-container" id="clients-grid">
+    <!-- Renderizado via JavaScript -->
+  </div>
+
+  <!-- DASHBOARD DE DETALHES (Área Inferior) -->
+  <div class="dashboard-panel">
+    <div class="dash-banner" id="dash-banner" style="display: none;">Tem contrato de horas</div>
+    
+    <div class="dash-content">
+      <!-- Coluna 1: Equipamentos -->
+      <div class="dash-col" id="dash-equipamentos" style="flex: 0.8">
+        <!-- Renderizado via JS -->
+      </div>
+
+      <!-- Coluna 2: Serviços -->
+      <div class="dash-col" id="dash-servicos">
+        <!-- Renderizado via JS -->
+      </div>
+
+      <!-- Coluna 3: Modalidades -->
+      <div class="dash-col" id="dash-modalidades">
+        <!-- Renderizado via JS -->
+      </div>
+
+      <!-- Coluna 4: Datas e Prazos -->
+      <div class="dash-col">
+        <div class="dash-card">
+          <h4>Encerramento</h4>
+          <h2 id="dash-encerramento">-</h2>
+        </div>
+        <div class="dash-card">
+          <h4>Dias Restantes</h4>
+          <h2 id="dash-dias-restantes">-</h2>
+        </div>
+      </div>
+
+      <!-- Coluna 5: Gráfico (Barra de Progresso) -->
+      <div class="gauge-card" style="flex: 1.5;">
+        <div class="gauge-title">Progresso</div>
+        
+        <div class="progress-container">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        
+        <div class="gauge-value" id="gauge-value">0%</div>
+        <div id="progress-warning" style="color: var(--neon-red); font-weight: bold; margin-top: 10px; font-size: 0.9rem; display: none;">VERIFICAR RENOVAÇÃO</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/clientes-sandbox.js?v=2"></script>
+
+</body>
+</html>
