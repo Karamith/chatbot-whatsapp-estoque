@@ -433,7 +433,7 @@ function inicializarJigsETecnicos() {
 
   const totalBackoffice = getScalar('SELECT COUNT(*) AS total FROM backoffice') || 0;
   if (totalBackoffice === 0) {
-    const backofficePath = path.resolve('./data/backoffice.xlsx');
+    const backofficePath = path.join(__dirname, '../../data/backoffice/backoffice.xlsx');
     if (fs.existsSync(backofficePath)) {
       console.log('Inicializando tabela backoffice a partir do Excel...');
       try {
