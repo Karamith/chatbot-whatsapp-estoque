@@ -90,7 +90,7 @@ async function handleIncomingMessage(message, client) {
 
   const enviarMenuComMascote = (telefoneMenu, nomeMenu) => {
     try {
-      const media = MessageMedia.fromFilePath('./ASSETS/mascote.png');
+      const media = MessageMedia.fromFilePath('./assets/mascote.png');
       const chatId = telefoneMenu.includes('@') ? telefoneMenu : `${telefoneMenu}@c.us`;
       client.sendMessage(chatId, media, { caption: MSG.MAIN_MENU(nomeMenu) })
         .catch(err => console.error('Erro ao enviar mascote:', err));

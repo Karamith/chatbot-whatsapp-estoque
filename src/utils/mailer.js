@@ -156,7 +156,7 @@ async function enviarEmailPedido(to, sessao, solicitacaoId, resumoTexto, nomeAdm
   const attachments = [
     {
       filename: 'mascote.png',
-      path: './ASSETS/mascote.png',
+      path: './assets/mascote.png',
       cid: 'mascotelogo'
     }
   ];

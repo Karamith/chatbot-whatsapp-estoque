@@ -1,0 +1,26 @@
+2026/07/09-17:20:37.893 7dbc Reusing MANIFEST C:\Users\ricardo.almeida\OneDrive - Comprint Maquinas e Materiais Graficos Ltda\PROJETOS\OUTROS\Programação\chatbot-whatsapp-estoque\data\sessions\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/07/09-17:20:37.893 7dbc Recovering log #25
+2026/07/09-17:20:37.894 7dbc Reusing old log C:\Users\ricardo.almeida\OneDrive - Comprint Maquinas e Materiais Graficos Ltda\PROJETOS\OUTROS\Programação\chatbot-whatsapp-estoque\data\sessions\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000025.log 
+2026/07/09-17:20:37.900 d5d8 Level-0 table #29: started
+2026/07/09-17:20:37.900 d5d8 Level-0 table #29: 0 bytes OK
+2026/07/09-17:20:37.901 d5d8 Delete type=0 #25
+2026/07/09-17:20:37.901 7dbc Manual compaction at level-0 from '\x00\x15\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x16\x00\x00\x00' @ 0 : 0; will stop at (end)
+2026/07/09-17:20:38.380 7dbc Compacting 1@1 + 1@2 files
+2026/07/09-17:20:38.392 7dbc Generated table #30@1: 228 keys, 4786 bytes
+2026/07/09-17:20:38.392 7dbc Compacted 1@1 + 1@2 files => 4786 bytes
+2026/07/09-17:20:38.393 7dbc compacted to: files[ 0 0 1 0 0 0 0 ]
+2026/07/09-17:20:38.393 d5d8 Level-0 table #32: started
+2026/07/09-17:20:38.399 d5d8 Level-0 table #32: 3509 bytes OK
+2026/07/09-17:20:38.399 d5d8 Delete type=0 #28
+2026/07/09-17:20:38.400 8d30 Manual compaction at level-0 from '\x00\x13\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x14\x00\x00\x00' @ 0 : 0; will stop at (end)
+2026/07/09-17:20:38.400 8d30 Manual compaction at level-1 from '\x00\x13\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x14\x00\x00\x00' @ 0 : 0; will stop at '\x00\x17\x00\x00\x05' @ 5164 : 1
+2026/07/09-17:20:38.400 8d30 Compacting 1@1 + 1@2 files
+2026/07/09-17:20:38.408 8d30 Generated table #33@1: 45 keys, 917 bytes
+2026/07/09-17:20:38.408 8d30 Compacted 1@1 + 1@2 files => 917 bytes
+2026/07/09-17:20:38.409 8d30 compacted to: files[ 0 0 1 0 0 0 0 ]
+2026/07/09-17:20:38.409 8d30 Delete type=2 #30
+2026/07/09-17:20:38.409 8d30 Delete type=2 #32
+2026/07/09-17:20:38.409 8d30 Manual compaction at level-1 from '\x00\x17\x00\x00\x05' @ 5164 : 1 .. '\x00\x14\x00\x00\x00' @ 0 : 0; will stop at (end)
+2026/07/09-17:20:38.441 bca0 Manual compaction at level-0 from '\x00\x17\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x18\x00\x00\x00' @ 0 : 0; will stop at (end)
+2026/07/09-17:20:38.441 bca0 Manual compaction at level-1 from '\x00\x17\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x18\x00\x00\x00' @ 0 : 0; will stop at (end)
+2026/07/09-17:20:38.705 bca0 Manual compaction at level-0 from '\x00\x18\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x19\x00\x00\x00' @ 0 : 0; will stop at (end)
