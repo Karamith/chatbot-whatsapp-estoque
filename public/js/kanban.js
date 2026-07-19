@@ -84,7 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
     card.dataset.id = pedido.id;
     card.dataset.status = pedido.status_pedido;
 
-    const isCIF = pedido.modelo && pedido.modelo.toUpperCase().includes('CIF');
+    const isCIF = (pedido.cliente && pedido.cliente.toUpperCase().includes('CIF')) || 
+                  (pedido.modelo && pedido.modelo.toUpperCase().includes('CIF'));
     card.dataset.iscif = isCIF ? 'true' : 'false';
 
     const cargo = pedido.cargo_tecnico || 'TÉCNICO';
@@ -148,6 +149,15 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div class="bo-card-row" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
         
+        ${isCIF ? `
+        <!-- Esquerda: PEDIDO (CIF não tem orçamento) -->
+        <div class="bo-info-group" style="flex: 1; text-align: left;">
+          <span class="bo-label">📦 PEDIDO</span>
+          <span class="bo-value" style="font-size: 0.85rem;">${pedido.numero_pedido_protheus || 'N/A'}</span>
+        </div>
+        <!-- Centro: Vazio para manter alinhamento -->
+        <div class="bo-info-group" style="flex: 1; text-align: center;"></div>
+        ` : `
         <!-- Esquerda: ORÇAMENTO -->
         <div class="bo-info-group" style="flex: 1; text-align: left;">
           <span class="bo-label">📄 ORÇAMENTO</span>
@@ -159,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="bo-label" style="justify-content: center;">📦 PEDIDO</span>
           <span class="bo-value" style="font-size: 0.85rem;">${pedido.numero_pedido_protheus || 'N/A'}</span>
         </div>
+        `}
 
         <!-- Direita: NF (se houver) e B.O. -->
         <div class="bo-info-group" style="flex: 1; text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
@@ -223,30 +234,44 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // 2. Ordenar pedidos: MD no topo, depois do mais antigo para o mais novo
-    pedidos.sort((a, b) => {
-      const aIsMD = a.md === 'sim' || a.md === 'Sim' || a.md === '1' || a.em_md === 'sim';
-      const bIsMD = b.md === 'sim' || b.md === 'Sim' || b.md === '1' || b.em_md === 'sim';
+    // 2. Agrupar pedidos por coluna
+    const pedidosPorColuna = {};
+    Object.keys(columns).forEach(k => pedidosPorColuna[k] = []);
 
-      if (aIsMD && !bIsMD) return -1;
-      if (!aIsMD && bIsMD) return 1;
-
-      return a.id - b.id; // Menor ID primeiro (mais antigo)
-    });
-
-    // 3. Adicionar aos domínios
     pedidos.forEach(pedido => {
       const statusMapeado = mapStatus[pedido.status_pedido] || 'PENDENTE';
-      const column = columns[statusMapeado];
-      if (column) {
+      if (pedidosPorColuna[statusMapeado]) {
+        pedidosPorColuna[statusMapeado].push(pedido);
+      }
+    });
+
+    // 3. Ordenar e renderizar por coluna
+    Object.keys(pedidosPorColuna).forEach(status => {
+      const colPedidos = pedidosPorColuna[status];
+      
+      colPedidos.sort((a, b) => {
+        const aIsMD = a.md === 'sim' || a.md === 'Sim' || a.md === '1' || a.em_md === 'sim';
+        const bIsMD = b.md === 'sim' || b.md === 'Sim' || b.md === '1' || b.em_md === 'sim';
+
+        if (aIsMD && !bIsMD) return -1;
+        if (!aIsMD && bIsMD) return 1;
+
+        if (status === 'FINALIZADO') {
+          return b.id - a.id; // Mais novo primeiro
+        } else {
+          return a.id - b.id; // Mais antigo primeiro
+        }
+      });
+
+      colPedidos.forEach(pedido => {
         const isMD = pedido.md === 'sim' || pedido.md === 'Sim' || pedido.md === '1' || pedido.em_md === 'sim';
-        column.appendChild(createCard(pedido));
+        columns[status].appendChild(createCard(pedido));
         
         if (isMD) {
-          const kanbanCol = column.closest('.kanban-column');
+          const kanbanCol = columns[status].closest('.kanban-column');
           if (kanbanCol) kanbanCol.classList.add('has-md');
         }
-      }
+      });
     });
   }
 
