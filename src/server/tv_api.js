@@ -412,11 +412,78 @@ function setupApi(app) {
         return res.status(403).send('<h1>Erro</h1><p>Token invalido ou expirado.</p>');
       }
 
-      const { baixarPedido } = require('../database/queries');
       const { getDb } = require('../database/connection');
       const db = getDb();
 
       // Verifica se o pedido existe e qual o status atual
+      const stmt = db.prepare("SELECT status_pedido, tecnico_nome, cliente, responsavel_baixa FROM solicitacoes WHERE id = ?");
+      stmt.bind([id]);
+      let pedido = null;
+      if (stmt.step()) {
+        pedido = stmt.getAsObject();
+      }
+      stmt.free();
+
+      if (!pedido) {
+        return res.status(404).send('<h1>Erro</h1><p>Pedido não encontrado.</p>');
+      }
+
+      if (pedido.status_pedido === 'EM_ANALISE' && pedido.responsavel_baixa) {
+        const responsavel = pedido.responsavel_baixa || 'outra pessoa da equipe';
+        return res.send(`
+          <div style="font-family: Arial; padding: 40px; text-align: center; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #f57c00;">Aviso</h1>
+            <p style="font-size: 18px;">Este pedido (#PD-${id}) já foi baixado anteriormente por <strong>${responsavel}</strong>.</p>
+          </div>
+        `);
+      }
+
+      // Mostra página de confirmação com botão (anti-prefetch do Outlook)
+      res.send(`
+        <html><body>
+        <div style="font-family: Arial; padding: 40px; text-align: center; max-width: 600px; margin: 0 auto; background-color: #fff3e0; border: 2px solid #ff9800; border-radius: 10px;">
+          <h1 style="color: #e65100;">📋 Pedido #PD-${id}</h1>
+          <p style="font-size: 18px;">Técnico: <strong>${pedido.tecnico_nome}</strong></p>
+          <p style="font-size: 18px;">Cliente: <strong>${pedido.cliente}</strong></p>
+          <p style="font-size: 16px; color: #555; margin-top: 20px;">Clique no botão abaixo para assumir este pedido:</p>
+          <form method="POST" action="/api/baixar-email-confirmar">
+            <input type="hidden" name="token" value="${token}" />
+            <button type="submit" style="margin-top: 15px; padding: 15px 40px; font-size: 18px; background-color: #4caf50; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+              ✅ Assumir Pedido
+            </button>
+          </form>
+        </div>
+        </body></html>
+      `);
+
+    } catch (err) {
+      console.error('Erro ao baixar via email:', err);
+      res.status(500).send('<h1>Erro</h1><p>Erro interno.</p>');
+    }
+  });
+
+  // POST: Executa a baixa de fato (protegido contra prefetch)
+  app.post('/api/baixar-email-confirmar', (req, res) => {
+    try {
+      const { token } = req.body;
+
+      if (!token) {
+        return res.status(400).send('<h1>Erro</h1><p>Token não informado.</p>');
+      }
+
+      let id, user;
+      try {
+        const payload = jwt.verify(token, config.JWT_SECRET);
+        id = payload.id;
+        user = payload.user;
+      } catch (err) {
+        return res.status(403).send('<h1>Erro</h1><p>Token invalido ou expirado.</p>');
+      }
+
+      const { baixarPedido } = require('../database/queries');
+      const { getDb } = require('../database/connection');
+      const db = getDb();
+
       const stmt = db.prepare("SELECT status_pedido, tecnico_nome, cliente, responsavel_baixa FROM solicitacoes WHERE id = ?");
       stmt.bind([id]);
       let pedido = null;
@@ -451,13 +518,13 @@ function setupApi(app) {
       res.send(`
         <div style="font-family: Arial; padding: 40px; text-align: center; max-width: 600px; margin: 0 auto; background-color: #e8f5e9; border: 2px solid #4caf50; border-radius: 10px;">
           <h1 style="color: #2e7d32;">✅ Sucesso!</h1>
-          <p style="font-size: 18px;">O pedido <strong>#PD-${id}</strong> (Técnico: ${pedido.tecnico_nome} | Cliente: ${pedido.cliente}) foi baixado com sucesso!</p>
+          <p style="font-size: 18px;">O pedido <strong>#PD-${id}</strong> (Técnico: ${pedido.tecnico_nome} | Cliente: ${pedido.cliente}) foi baixado com sucesso por <strong>${user}</strong>!</p>
           <p style="color: #666; font-size: 14px; margin-top: 30px;">Você já pode fechar esta janela.</p>
         </div>
       `);
 
     } catch (err) {
-      console.error('Erro ao baixar via email:', err);
+      console.error('Erro ao confirmar baixa via email:', err);
       res.status(500).send('<h1>Erro</h1><p>Erro interno.</p>');
     }
   });
