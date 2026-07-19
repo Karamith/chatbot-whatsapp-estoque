@@ -14,7 +14,7 @@ module.exports = {
   SMTP_USER: process.env.SMTP_USER,
   SMTP_PASS: process.env.SMTP_PASS,
   SMTP_FROM: process.env.SMTP_FROM || process.env.SMTP_USER,
-  BASE_URL: process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`,
+  BASE_URL: process.env.BASE_URL || 'http://66.94.100.86:3000',
   
   // Configuracoes de IMAP (Recebimento para Kanban)
   IMAP_ENABLED: process.env.IMAP_ENABLED === 'true',
