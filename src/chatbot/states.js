@@ -362,16 +362,34 @@ async function handlePerguntaMD(sessao, texto, client, telefone) {
 async function handlePerguntaUrgencia(sessao, texto, client, telefone) {
   if (texto === '1') {
     sessao.urgencia = 'Atendimento Imediato';
+    session.setRespostasCheckout(sessao.id, sessao.motivo, sessao.md, sessao.urgencia);
+    session.setEstado(sessao.id, 'pergunta_motivo');
+    enviarMensagem(client, telefone, MSG.ASK_MOTIVO);
   } else if (texto === '2') {
     sessao.urgencia = 'UTK';
+    sessao.motivo = 'N/A (UTK)'; // UTK não tem motivo (Atendimento/Diagnóstico)
+    
+    session.setRespostasCheckout(sessao.id, sessao.motivo, sessao.md, sessao.urgencia);
+    
+    // Pula direto para o resumo (checkout)
+    let resumoTexto = '';
+    sessao.itens_consultados.forEach(i => {
+      if (i.quantidadeDesejada > 0) {
+        const isImport = i.importacao ? '[! Importar] ' : '';
+        const isRedundante = i.alerta_redundancia ? `[ALERTA: Solicitada há menos de 15 dias por ${i.alerta_redundancia}] ` : '';
+        const isEdicula = i.isEdicula ? `[EDÍCULA - Loc: ${i.localizacao || 'N/A'}] ` : '';
+        resumoTexto += `- ${isImport}${isRedundante}${isEdicula}${i.codigo} | ${i.descricao} | Quantidade: ${i.quantidadeDesejada}\n`;
+      }
+    });
+
+    const preview = MSG.REQUEST_SUMMARY(sessao.tecnico_nome, sessao.cliente, sessao.modelo, resumoTexto, sessao.motivo, sessao.md, sessao.urgencia);
+    
+    session.setEstado(sessao.id, 'confirmacao');
+    enviarMensagem(client, telefone, preview);
   } else {
     enviarMensagem(client, telefone, MSG.ERROR_INVALID_OPTION);
     return;
   }
-  
-  session.setRespostasCheckout(sessao.id, sessao.motivo, sessao.md, sessao.urgencia);
-  session.setEstado(sessao.id, 'pergunta_motivo');
-  enviarMensagem(client, telefone, MSG.ASK_MOTIVO);
 }
 
 async function handlePerguntaMotivo(sessao, texto, client, telefone) {
