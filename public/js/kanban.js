@@ -135,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="bo-value" style="font-size: 0.85rem;">${pedido.tecnico_nome || 'N/A'}</span>
           </div>
         </div>
+        ${pedido.motivo && pedido.motivo.toLowerCase().includes('diagn') ? '<img src="/bo-assets/diagnostico.png" alt="Diagnóstico" title="Peças para Diagnóstico" style="width: 32px; height: 32px; object-fit: contain;">' : ''}
         <span class="bo-role-badge" style="border-color: ${cargoColor}; color: ${cargoColor};">${cargo}</span>
       </div>
       <div class="bo-card-grid">
@@ -152,14 +153,14 @@ document.addEventListener('DOMContentLoaded', () => {
         ${isCIF ? `
         <!-- Esquerda: PEDIDO (CIF não tem orçamento) -->
         <div class="bo-info-group" style="flex: 1; text-align: left;">
-          <span class="bo-label">📦 PEDIDO</span>
+          <span class="bo-label"><img src="/bo-assets/pedido.png" style="width: 14px; height: 14px; object-fit: contain; vertical-align: text-bottom; margin-right: 4px;"> PEDIDO</span>
           <span class="bo-value" style="font-size: 0.85rem;">${pedido.numero_pedido_protheus || 'N/A'}</span>
         </div>
         <!-- Centro: NF -->
         <div class="bo-info-group" style="flex: 1; text-align: center; display: flex; flex-direction: column; align-items: center;">
           ${pedido.nota_fiscal ? `
           <div style="display: flex; flex-direction: column; align-items: center;">
-            <span class="bo-label" style="justify-content: center;">🧾 NF</span>
+            <span class="bo-label" style="justify-content: center;"><img src="/bo-assets/nf.png" style="width: 14px; height: 14px; object-fit: contain; vertical-align: text-bottom; margin-right: 4px;"> NF</span>
             <span class="bo-value" style="font-size: 0.85rem;">${pedido.nota_fiscal}</span>
           </div>
           ` : ''}
@@ -167,19 +168,19 @@ document.addEventListener('DOMContentLoaded', () => {
         ` : `
         <!-- Esquerda: ORÇAMENTO -->
         <div class="bo-info-group" style="flex: 1; text-align: left;">
-          <span class="bo-label">📄 ORÇAMENTO</span>
+          <span class="bo-label"><img src="/bo-assets/orcamento.png" style="width: 14px; height: 14px; object-fit: contain; vertical-align: text-bottom; margin-right: 4px;"> ORÇAMENTO</span>
           <span class="bo-value" style="font-size: 0.85rem;">${pedido.numero_orcamento || 'N/A'}</span>
         </div>
 
         <!-- Centro: PEDIDO e NF -->
         <div class="bo-info-group" style="flex: 1; text-align: center; display: flex; flex-direction: column; align-items: center;">
           <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: ${pedido.nota_fiscal ? '4px' : '0'};">
-            <span class="bo-label" style="justify-content: center;">📦 PEDIDO</span>
+            <span class="bo-label" style="justify-content: center;"><img src="/bo-assets/pedido.png" style="width: 14px; height: 14px; object-fit: contain; vertical-align: text-bottom; margin-right: 4px;"> PEDIDO</span>
             <span class="bo-value" style="font-size: 0.85rem;">${pedido.numero_pedido_protheus || 'N/A'}</span>
           </div>
           ${pedido.nota_fiscal ? `
           <div style="display: flex; flex-direction: column; align-items: center;">
-            <span class="bo-label" style="justify-content: center;">🧾 NF</span>
+            <span class="bo-label" style="justify-content: center;"><img src="/bo-assets/nf.png" style="width: 14px; height: 14px; object-fit: contain; vertical-align: text-bottom; margin-right: 4px;"> NF</span>
             <span class="bo-value" style="font-size: 0.85rem;">${pedido.nota_fiscal}</span>
           </div>
           ` : ''}
