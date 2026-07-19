@@ -155,8 +155,15 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="bo-label">📦 PEDIDO</span>
           <span class="bo-value" style="font-size: 0.85rem;">${pedido.numero_pedido_protheus || 'N/A'}</span>
         </div>
-        <!-- Centro: Vazio para manter alinhamento -->
-        <div class="bo-info-group" style="flex: 1; text-align: center;"></div>
+        <!-- Centro: NF -->
+        <div class="bo-info-group" style="flex: 1; text-align: center; display: flex; flex-direction: column; align-items: center;">
+          ${pedido.nota_fiscal ? `
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <span class="bo-label" style="justify-content: center;">🧾 NF</span>
+            <span class="bo-value" style="font-size: 0.85rem;">${pedido.nota_fiscal}</span>
+          </div>
+          ` : ''}
+        </div>
         ` : `
         <!-- Esquerda: ORÇAMENTO -->
         <div class="bo-info-group" style="flex: 1; text-align: left;">
@@ -164,21 +171,23 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="bo-value" style="font-size: 0.85rem;">${pedido.numero_orcamento || 'N/A'}</span>
         </div>
 
-        <!-- Centro: PEDIDO -->
-        <div class="bo-info-group" style="flex: 1; text-align: center;">
-          <span class="bo-label" style="justify-content: center;">📦 PEDIDO</span>
-          <span class="bo-value" style="font-size: 0.85rem;">${pedido.numero_pedido_protheus || 'N/A'}</span>
-        </div>
-        `}
-
-        <!-- Direita: NF (se houver) e B.O. -->
-        <div class="bo-info-group" style="flex: 1; text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+        <!-- Centro: PEDIDO e NF -->
+        <div class="bo-info-group" style="flex: 1; text-align: center; display: flex; flex-direction: column; align-items: center;">
+          <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: ${pedido.nota_fiscal ? '4px' : '0'};">
+            <span class="bo-label" style="justify-content: center;">📦 PEDIDO</span>
+            <span class="bo-value" style="font-size: 0.85rem;">${pedido.numero_pedido_protheus || 'N/A'}</span>
+          </div>
           ${pedido.nota_fiscal ? `
-          <div style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 4px;">
-            <span class="bo-label" style="justify-content: flex-end;">🧾 NF</span>
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <span class="bo-label" style="justify-content: center;">🧾 NF</span>
             <span class="bo-value" style="font-size: 0.85rem;">${pedido.nota_fiscal}</span>
           </div>
           ` : ''}
+        </div>
+        `}
+
+        <!-- Direita: Apenas B.O. -->
+        <div class="bo-info-group" style="flex: 1; text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
           <div style="display: flex; flex-direction: column; align-items: flex-end;">
             <span class="bo-label" style="justify-content: flex-end;">🛡️ B.O.</span>
             <span class="bo-value" style="font-size: 0.85rem; color: #8E929B;">${(pedido.responsavel_baixa || 'N/A').split(' ')[0]}</span>
