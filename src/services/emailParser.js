@@ -6,7 +6,8 @@ const APPROVAL_KEYWORDS = [
   'pode faturar', 'fature', 'pode seguir', 'dê seguimento',
   'de seguimento', 'concordo', 'autorizo', 'autorizamos',
   'sim', 'seguir com', 'mandar', 'pode mandar', 'confirmo',
-  'liberado', 'pedido liberado', 'pedido aprovado'
+  'liberado', 'pedido liberado', 'pedido aprovado', 'libere', 
+  'liberar', 'aprovar', 'aprove', 'pode aprovar'
 ];
 
 /**
