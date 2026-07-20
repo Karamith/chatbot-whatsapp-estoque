@@ -252,6 +252,9 @@ function renderData(data) {
     } else if (item.status_pedido === 'ORCAMENTO_ENVIADO' || item.status_pedido === 'EM_ANALISE') {
       statusColor = 'var(--warning-color)';
       textColor = '#000';
+    } else if (item.status_pedido === 'EM_PROCESSAMENTO') {
+      statusColor = 'var(--accent-color)';
+      textColor = '#fff';
     }
 
     const eq = (item.equipamento || 'N/I').replace(/'/g, "\\'");
