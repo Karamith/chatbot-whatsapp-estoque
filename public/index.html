@@ -429,7 +429,20 @@
 
   <div id="toast-container" class="toast-container"></div>
 
+  <!-- Modal de Peças -->
+  <div id="pecas-modal" class="pecas-modal-overlay">
+    <div class="pecas-modal">
+      <div class="pecas-modal-header">
+        <h3 id="pecas-modal-title">Peças Solicitadas</h3>
+        <button class="pecas-modal-close" onclick="closePecasModal()"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="pecas-modal-body" id="pecas-modal-body">
+        <!-- Itens preenchidos via JS -->
+      </div>
+    </div>
+  </div>
+
   <script src="/socket.io/socket.io.js"></script>
-  <script src="js/app.js?v=3"></script>
+  <script src="js/app.js?v=4"></script>
 </body>
 </html>

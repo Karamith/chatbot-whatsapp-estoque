@@ -213,16 +213,15 @@ function renderData(data) {
     </li>
   `);
 
-  const formatPecas = (pecas) => {
-    if (!pecas || pecas.length === 0) return 'Nenhuma peça';
-    return pecas.join(' | ');
-  };
+  // Função removida: formatPecas (agora exibidas via modal)
 
   const pedidosPendentesApenas = data.pedidosPorStatus ? data.pedidosPorStatus['PENDENTE'] : [];
   renderList("list-pedidos-pendentes", pedidosPendentesApenas, item => `
-    <li class="ranking-item" title="${formatPecas(item.pecas_solicitadas)}" style="animation-delay: ${Math.random() * 0.3}s">
+    <li class="ranking-item" style="animation-delay: ${Math.random() * 0.3}s">
       <div class="ranking-info">
-        <span class="ranking-title">#PD-${item.id}</span>
+        <span class="ranking-title">
+          <a href="#" onclick="openPecasModal('${encodeURIComponent(JSON.stringify(item.pecas_solicitadas || []))}', ${item.id}); return false;" style="color:var(--accent-color); text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-hover)'" onmouseout="this.style.color='var(--accent-color)'">#PD-${item.id}</a>
+        </span>
         <span class="ranking-subtitle">${item.cliente} / ${item.tecnico_nome}</span>
       </div>
     </li>
@@ -244,9 +243,11 @@ function renderData(data) {
     else if (item.numero_orcamento) extra = `<span style="font-size:0.95rem; font-weight:bold; color:var(--text-primary);">ORÇ: ${item.numero_orcamento}</span>`;
 
     return `
-    <li class="ranking-item" title="${formatPecas(item.pecas_solicitadas)}" style="animation-delay: ${Math.random() * 0.3}s">
+    <li class="ranking-item" style="animation-delay: ${Math.random() * 0.3}s">
       <div class="ranking-info">
-        <span class="ranking-title">#PD-${item.id}</span>
+        <span class="ranking-title">
+          <a href="#" onclick="openPecasModal('${encodeURIComponent(JSON.stringify(item.pecas_solicitadas || []))}', ${item.id}); return false;" style="color:var(--accent-color); text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-hover)'" onmouseout="this.style.color='var(--accent-color)'">#PD-${item.id}</a>
+        </span>
         <span class="ranking-subtitle">${item.cliente} / ${item.tecnico_nome}</span>
       </div>
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
@@ -259,9 +260,11 @@ function renderData(data) {
   renderList("list-nf-emitida", data.pedidosPorStatus ? data.pedidosPorStatus['FINALIZADO'] : [], item => {
     let extra = item.nota_fiscal ? `<span class="ranking-score" style="font-size:0.95rem; font-weight:bold; color:var(--text-primary);">NF: ${item.nota_fiscal}</span>` : '';
     return `
-    <li class="ranking-item" title="${formatPecas(item.pecas_solicitadas)}" style="animation-delay: ${Math.random() * 0.3}s">
+    <li class="ranking-item" style="animation-delay: ${Math.random() * 0.3}s">
       <div class="ranking-info">
-        <span class="ranking-title">#PD-${item.id}</span>
+        <span class="ranking-title">
+          <a href="#" onclick="openPecasModal('${encodeURIComponent(JSON.stringify(item.pecas_solicitadas || []))}', ${item.id}); return false;" style="color:var(--accent-color); text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-hover)'" onmouseout="this.style.color='var(--accent-color)'">#PD-${item.id}</a>
+        </span>
         <span class="ranking-subtitle">${item.cliente} / ${item.tecnico_nome}</span>
       </div>
       ${extra}
@@ -765,4 +768,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('change', renderDatabase);
   });
+});
+
+// Controle do Modal de Peças
+function openPecasModal(pecasJsonEncoded, id) {
+  try {
+    const pecasStr = decodeURIComponent(pecasJsonEncoded);
+    const pecas = JSON.parse(pecasStr);
+    
+    document.getElementById('pecas-modal-title').innerText = `Peças Solicitadas (#PD-${id})`;
+    
+    const body = document.getElementById('pecas-modal-body');
+    if (!pecas || pecas.length === 0) {
+      body.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Nenhuma peça registrada.</p>';
+    } else {
+      body.innerHTML = pecas.map(p => `
+        <div class="peca-item">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <span class="peca-codigo">${p.codigo_peca || 'N/A'}</span>
+            <span class="peca-qtd">${p.quantidade_solicitada || 1}x</span>
+          </div>
+          <span class="peca-desc">${p.descricao_peca || 'Sem descrição'}</span>
+        </div>
+      `).join('');
+    }
+    
+    document.getElementById('pecas-modal').classList.add('active');
+  } catch (err) {
+    console.error("Erro ao abrir modal", err);
+  }
+}
+
+function closePecasModal() {
+  document.getElementById('pecas-modal').classList.remove('active');
+}
+
+// Fechar ao clicar fora
+document.addEventListener('click', (e) => {
+  const modal = document.getElementById('pecas-modal');
+  if (modal && e.target === modal) {
+    closePecasModal();
+  }
 });

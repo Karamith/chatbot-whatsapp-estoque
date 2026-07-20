@@ -129,7 +129,7 @@ function setupApi(app) {
 
       // 12. Listas de pedidos por status (Kanban)
       const stmtPecasPendentes = db.prepare(`
-        SELECT solicitacao_id, codigo_peca, quantidade_solicitada 
+        SELECT solicitacao_id, codigo_peca, descricao_peca, quantidade_solicitada 
         FROM solicitacao_itens 
         WHERE solicitacao_id IN (SELECT id FROM solicitacoes WHERE status_pedido != 'FINALIZADO')
       `);
@@ -137,7 +137,11 @@ function setupApi(app) {
       while(stmtPecasPendentes.step()) {
         const item = stmtPecasPendentes.getAsObject();
         if(!pecasPorPedido[item.solicitacao_id]) pecasPorPedido[item.solicitacao_id] = [];
-        pecasPorPedido[item.solicitacao_id].push(`${item.quantidade_solicitada}x ${item.codigo_peca}`);
+        pecasPorPedido[item.solicitacao_id].push({
+          codigo_peca: item.codigo_peca,
+          descricao_peca: item.descricao_peca,
+          quantidade_solicitada: item.quantidade_solicitada
+        });
       }
       stmtPecasPendentes.free();
 
