@@ -102,7 +102,12 @@ function setupApi(app) {
       const stmtMd = db.prepare(`
         SELECT cliente, modelo
         FROM solicitacoes
-        WHERE (md = 'Sim' OR md = '1' OR em_md = 'sim') AND status_pedido = 'PENDENTE'
+        WHERE (md = 'Sim' OR md = '1' OR em_md = 'sim') 
+          AND (
+            ( (UPPER(IFNULL(modelo, '')) LIKE '%VENDA%' OR UPPER(IFNULL(modelo, '')) LIKE '%CAREPACK%') AND status_pedido IN ('PENDENTE', 'EM_ANALISE', 'ORCAMENTO_ENVIADO') )
+            OR ( UPPER(IFNULL(modelo, '')) LIKE '%CIF%' AND status_pedido IN ('PENDENTE', 'EM_ANALISE', 'ORCAMENTO_ENVIADO', 'APROVADO') )
+            OR ( UPPER(IFNULL(modelo, '')) NOT LIKE '%VENDA%' AND UPPER(IFNULL(modelo, '')) NOT LIKE '%CAREPACK%' AND UPPER(IFNULL(modelo, '')) NOT LIKE '%CIF%' AND status_pedido = 'PENDENTE' )
+          )
       `);
       const mdTickerData = [];
       while(stmtMd.step()) mdTickerData.push(stmtMd.getAsObject());
