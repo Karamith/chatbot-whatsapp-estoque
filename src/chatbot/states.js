@@ -460,6 +460,15 @@ async function handleConfirmacao(sessao, texto, client, telefone) {
           mailer.enviarEmailPedido(boUser.email, sessao, solicitacaoId, resumoTexto, boUser.nome);
         }
       });
+
+      // Envia e-mail de confirmação para o próprio técnico (sem botão Baixar), caso seja Maurício Mateos ou Emerson Zanella
+      const tecnicoObj = jigs.buscarTecnicoPorTelefone(telefone);
+      if (tecnicoObj && tecnicoObj.email) {
+        const nomeTecnico = tecnicoObj.nome.toUpperCase();
+        if (nomeTecnico === 'MATEOS' || nomeTecnico === 'ZANELLA') {
+          mailer.enviarEmailPedido(tecnicoObj.email, sessao, solicitacaoId, resumoTexto, tecnicoObj.nome, false);
+        }
+      }
     }
 
     enviarMensagem(client, telefone, MSG.REQUEST_SENT_TECH);

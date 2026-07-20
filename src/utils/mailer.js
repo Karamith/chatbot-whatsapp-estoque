@@ -46,7 +46,7 @@ async function enviarEmailHTML(to, subject, html, attachments = []) {
 /**
  * Monta e envia o e-mail de Novo Pedido (Backoffice)
  */
-async function enviarEmailPedido(to, sessao, solicitacaoId, resumoTexto, nomeAdmin) {
+async function enviarEmailPedido(to, sessao, solicitacaoId, resumoTexto, nomeAdmin, exibirBotaoBaixar = true) {
   const subject = `NOVO PEDIDO DE PEÇA - #${solicitacaoId} - ${sessao.tecnico_nome}`;
   
   const baseUrl = config.BASE_URL;
@@ -112,6 +112,20 @@ async function enviarEmailPedido(to, sessao, solicitacaoId, resumoTexto, nomeAdm
 
   const finalidadeStr = sessao.motivo === 'Diagnóstico' || sessao.motivo === '2' ? 'Para Diagnóstico' : 'Para Atendimento';
 
+  let botaoBaixarHtml = '';
+  if (exibirBotaoBaixar) {
+    botaoBaixarHtml = `
+        <div style="text-align: center; margin-top: 35px; margin-bottom: 15px;">
+          <a href="${linkBaixa}" style="display: inline-block; background-color: #115719; color: #ffffff; padding: 16px 32px; text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 4px; border: 1px solid #1e6e28; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+            ✅ DAR BAIXA NESTE PEDIDO
+          </a>
+        </div>
+        <p style="text-align: center; color: #888888; font-size: 12px;">
+          Ao clicar no botão acima, o pedido será baixado automaticamente do sistema.
+        </p>
+    `;
+  }
+
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; background-color: #2c2c2c; border: 1px solid #444; border-radius: 8px; overflow: hidden; color: #e0e0e0;">
       
@@ -142,14 +156,7 @@ async function enviarEmailPedido(to, sessao, solicitacaoId, resumoTexto, nomeAdm
           📌 Protocolo #PD-${solicitacaoId}
         </div>
 
-        <div style="text-align: center; margin-top: 35px; margin-bottom: 15px;">
-          <a href="${linkBaixa}" style="display: inline-block; background-color: #115719; color: #ffffff; padding: 16px 32px; text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 4px; border: 1px solid #1e6e28; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-            ✅ DAR BAIXA NESTE PEDIDO
-          </a>
-        </div>
-        <p style="text-align: center; color: #888888; font-size: 12px;">
-          Ao clicar no botão acima, o pedido será baixado automaticamente do sistema.
-        </p>
+        ${botaoBaixarHtml}
       </div>
     </div>
   `;
