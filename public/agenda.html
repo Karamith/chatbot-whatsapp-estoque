@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda Dinâmica</title>
+  <link rel="stylesheet" href="css/agenda.css?v=25">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+  
+  <div class="agenda-layout">
+    
+    <!-- Sidebar - Técnicos -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">
+          <i class="ph-fill ph-lightning" style="color: #ef4444;"></i> Agenda Dinâmica
+        </h2>
+        <button class="btn-secondary" onclick="window.location.href='backoffice.html'" style="width:100%; margin-top:8px; display:flex; justify-content:center; align-items:center; gap:6px; font-size:0.8rem; border:1px solid rgba(255,255,255,0.1);">
+          <i class="ph ph-arrow-left"></i> Voltar ao Kanban
+        </button>
+        <div class="search-box">
+          <i class="ph ph-magnifying-glass"></i>
+          <input type="text" id="search-tecnico" placeholder="Buscar técnico...">
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">
+          DISPONÍVEIS (<span id="count-disponiveis">0</span>)
+        </div>
+        <ul class="tecnicos-list" id="list-disponiveis">
+          <!-- Populated by JS -->
+        </ul>
+        <button class="btn-ver-todos">Ver todos <i class="ph ph-caret-down"></i></button>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title" style="color: #ef4444;">
+          INDISPONÍVEIS (<span id="count-indisponiveis">0</span>)
+        </div>
+        <ul class="tecnicos-list" id="list-indisponiveis">
+          <!-- Populated by JS -->
+        </ul>
+        <button class="btn-ver-todos" style="color: #ef4444;">Ver todos <i class="ph ph-caret-down"></i></button>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="btn-primary" id="btn-add-agendamento">
+          <i class="ph ph-plus"></i> Adicionar agendamento
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="week-navigation">
+          <button class="btn-icon" id="btn-prev-week"><i class="ph ph-caret-left"></i></button>
+          <div class="week-display">
+            <i class="ph ph-calendar-blank"></i>
+            <strong id="week-dates-label">-- a -- de --</strong>
+          </div>
+          <button class="btn-icon" id="btn-next-week"><i class="ph ph-caret-right"></i></button>
+        </div>
+
+        <div class="top-widgets">
+          <div class="widget">
+            <i class="ph ph-calendar-star widget-icon" style="color: #ec4899;"></i>
+            <div class="widget-info">
+              <span class="widget-label">Próximo feriado</span>
+              <strong class="widget-value">07/09 - Independência</strong>
+            </div>
+          </div>
+          <div class="widget">
+            <img src="/icons/disponivel.png" class="widget-icon" style="width: 28px; height: 28px; object-fit: contain;">
+            <div class="widget-info">
+              <strong class="widget-value" style="color: #10b981; font-size: 1.2rem;">18</strong>
+              <span class="widget-label">Disponíveis</span>
+            </div>
+          </div>
+          <div class="widget" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2);">
+            <img src="/icons/indisponivel.png" class="widget-icon" style="width: 28px; height: 28px; object-fit: contain;">
+            <div class="widget-info">
+              <strong class="widget-value" style="color: #ef4444; font-size: 1.2rem;">12</strong>
+              <span class="widget-label" style="color: #fca5a5;">Indisponíveis</span>
+            </div>
+          </div>
+          <div class="widget">
+            <i class="ph-fill ph-users-three widget-icon" style="color: #94a3b8;"></i>
+            <div class="widget-info">
+              <strong class="widget-value" style="color: #f8fafc; font-size: 1.2rem;">30</strong>
+              <span class="widget-label">Total técnicos</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Kanban Board (Week) -->
+      <div class="board-container">
+        
+        <div class="day-column" id="col-segunda" data-day="1">
+          <div class="day-header">
+            <h3>SEGUNDA</h3>
+            <span class="day-date">--/--</span>
+          </div>
+          <div class="day-body" id="body-segunda"></div>
+        </div>
+        
+        <div class="day-column" id="col-terca" data-day="2">
+          <div class="day-header">
+            <h3>TERÇA</h3>
+            <span class="day-date">--/--</span>
+          </div>
+          <div class="day-body" id="body-terca"></div>
+        </div>
+        
+        <div class="day-column" id="col-quarta" data-day="3">
+          <div class="day-header">
+            <h3>QUARTA</h3>
+            <span class="day-date">--/--</span>
+          </div>
+          <div class="day-body" id="body-quarta"></div>
+        </div>
+        
+        <div class="day-column" id="col-quinta" data-day="4">
+          <div class="day-header">
+            <h3>QUINTA</h3>
+            <span class="day-date">--/--</span>
+          </div>
+          <div class="day-body" id="body-quinta"></div>
+        </div>
+        
+        <div class="day-column" id="col-sexta" data-day="5">
+          <div class="day-header">
+            <h3>SEXTA</h3>
+            <span class="day-date">--/--</span>
+          </div>
+          <div class="day-body" id="body-sexta"></div>
+        </div>
+        
+        <div class="day-column" id="col-sabado" data-day="6">
+          <div class="day-header">
+            <h3>SÁBADO</h3>
+            <span class="day-date">--/--</span>
+          </div>
+          <div class="day-body" id="body-sabado"></div>
+        </div>
+        
+        <div class="day-column" id="col-domingo" data-day="7">
+          <div class="day-header">
+            <h3>DOMINGO</h3>
+            <span class="day-date">--/--</span>
+          </div>
+          <div class="day-body" id="body-domingo"></div>
+        </div>
+        
+      </div>
+
+      <!-- Footer / Legends -->
+      <footer class="bottom-bar">
+        <div class="legends">
+          <div class="legend-item"><span class="dot bg-green"></span> Em atendimento</div>
+          <div class="legend-item"><span class="dot bg-yellow"></span> Em deslocamento</div>
+          <div class="legend-item"><span class="dot bg-blue"></span> Pausa / Intervalo</div>
+          <div class="legend-item"><span class="dot bg-purple"></span> Reunião</div>
+          <div class="legend-item"><span class="dot bg-red"></span> Indisponível</div>
+          <div class="legend-item"><span class="dot bg-gray"></span> Disponível</div>
+        </div>
+        
+        <div class="sync-info">
+          <span class="last-sync">Última atualização: <span id="sync-time">--/--/---- --:--</span></span>
+          <button class="btn-icon-small"><i class="ph ph-arrows-clockwise"></i></button>
+          <button class="btn-sync"><i class="ph ph-arrows-down-up"></i> Sincronizar</button>
+        </div>
+      </footer>
+      
+    </main>
+
+  </div>
+
+  <!-- Modal Adicionar Agendamento -->
+  <div id="modal-agendamento" class="modal">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Adicionar Agendamento</h2>
+        <button class="btn-close" id="btn-close-modal"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="form-agendamento">
+          <div class="form-group">
+            <label for="select-tecnico">Técnico</label>
+            <select id="select-tecnico" required>
+              <option value="">Selecione um técnico...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="select-data">Data</label>
+            <input type="date" id="select-data" required>
+          </div>
+          <div class="form-group">
+            <label for="select-status">Status / Motivo</label>
+            <select id="select-status" required>
+              <option value="Atendimento">Atendimento (Cliente)</option>
+              <option value="Deslocamento">Deslocamento</option>
+              <option value="Treinamento">Treinamento</option>
+              <option value="Folga">Folga</option>
+              <option value="Atestado">Atestado</option>
+              <option value="Ausente">Ausente</option>
+              <option value="Médico">Médico</option>
+              <option value="Férias">Férias</option>
+            </select>
+          </div>
+          <div class="form-group" id="group-cliente">
+            <label for="input-cliente">Cliente</label>
+            <input type="text" id="input-cliente" placeholder="Nome do cliente ou OS">
+          </div>
+          <div class="form-group">
+            <label for="select-periodo">Período</label>
+            <select id="select-periodo" required>
+              <option value="manha">Manhã (08h30 - 13h00)</option>
+              <option value="tarde">Tarde (13h01 - 17h30)</option>
+              <option value="integral">Dia Inteiro (08h30 - 17h30)</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="btn-cancelar-modal">Cancelar</button>
+            <button type="submit" class="btn-primary">Confirmar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <script src="js/agenda.js?v=27"></script>
+</body>
+</html>

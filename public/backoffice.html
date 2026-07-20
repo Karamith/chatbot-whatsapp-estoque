@@ -43,8 +43,10 @@
     <div class="bo-header-right">
       <!-- Botões III e IV -->
       <div class="bo-nav-group" style="margin-right: 32px;">
-        <button class="bo-nav-btn" id="btn-menu-3"><img src="/bo-assets/Agenda.png" alt="Agenda" class="nav-icon-img"> Agenda</button>
+        <button class="bo-nav-btn" id="btn-menu-3" onclick="window.location.href='agenda.html'"><img src="/bo-assets/Agenda.png" alt="Agenda" class="nav-icon-img"> Agenda</button>
         <button class="bo-nav-btn" id="btn-menu-4" onclick="window.location.href='importacoes.html'"><span class="nav-icon">✈️</span> Importar</button>
+        <button class="bo-nav-btn" id="btn-upload-estoque"><span class="nav-icon">⬆️</span> Estoque</button>
+        <input type="file" id="file-upload-estoque" accept=".xlsx" style="display: none;">
       </div>
 
       <div class="bo-user-info">
@@ -315,6 +317,52 @@
         drawerClientes.classList.remove('open');
       }
     });
+
+    // Upload de Estoque
+    const btnUploadEstoque = document.getElementById('btn-upload-estoque');
+    const fileUploadEstoque = document.getElementById('file-upload-estoque');
+
+    if (btnUploadEstoque && fileUploadEstoque) {
+      btnUploadEstoque.addEventListener('click', () => {
+        fileUploadEstoque.click();
+      });
+
+      fileUploadEstoque.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('planilha', file);
+
+        try {
+          btnUploadEstoque.disabled = true;
+          btnUploadEstoque.innerHTML = '<span class="nav-icon">⏳</span> Enviando...';
+          
+          const token = localStorage.getItem('bo_token');
+          const res = await fetch('/api/upload-estoque', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            },
+            body: formData
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            alert('Planilha de estoque atualizada com sucesso!');
+          } else {
+            alert('Erro ao atualizar: ' + (data.error || 'Erro desconhecido'));
+          }
+        } catch (error) {
+          console.error(error);
+          alert('Erro ao enviar o arquivo.');
+        } finally {
+          btnUploadEstoque.disabled = false;
+          btnUploadEstoque.innerHTML = '<span class="nav-icon">⬆️</span> Estoque';
+          fileUploadEstoque.value = ''; // Limpa o input
+        }
+      });
+    }
   </script>
   
   <script src="/socket.io/socket.io.js"></script>

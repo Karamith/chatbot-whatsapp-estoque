@@ -30,6 +30,7 @@ async function initDatabase() {
   migrarSchemaBackoffice();
   migrarSchemaNotaFiscal();
   migrarSchemaImportacao();
+  migrarSchemaAgenda();
   migrarJsonSeNecessario();
   inicializarJigsETecnicos();
   saveDb();
@@ -251,6 +252,21 @@ function migrarSchemaImportacao() {
   if (colunasItens.length > 0 && !colunasItens.includes('importacao')) {
     db.run('ALTER TABLE solicitacao_itens ADD COLUMN importacao INTEGER DEFAULT 0');
   }
+}
+
+function migrarSchemaAgenda() {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS agendamentos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tecnico_nome TEXT NOT NULL,
+      cliente TEXT NOT NULL,
+      start_time TEXT NOT NULL,
+      end_time TEXT NOT NULL,
+      data_agendamento TEXT NOT NULL,
+      status TEXT NOT NULL,
+      criado_em TEXT NOT NULL
+    );
+  `);
 }
 
 function getScalar(sql, params = []) {

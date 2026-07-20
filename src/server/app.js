@@ -17,6 +17,8 @@ const { Server } = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*';
+const multer = require('multer');
+
 const io = new Server(server, { cors: { origin: allowedOrigins } });
 app.set('io', io); // Deixa o io disponível nas rotas se precisar
 
@@ -25,6 +27,18 @@ if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
   console.error('ERRO FATAL: JWT_SECRET não definido no .env em produção!');
   process.exit(1);
 }
+
+// Configuração do Multer para Upload da Planilha
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../../data/'));
+  },
+  filename: function (req, file, cb) {
+    // Sobrescreve sempre como estoque.xlsx, independente do nome original
+    cb(null, 'estoque.xlsx');
+  }
+});
+const upload = multer({ storage: storage });
 
 // Middlewares
 app.use(cors({ origin: allowedOrigins }));
@@ -37,6 +51,22 @@ app.use('/avatares', express.static(path.join(__dirname, '../../data/avatares'))
 
 // Inicializa as rotas da TV (Dashboard Legado)
 setupApi(app);
+
+// Rota de Upload do Estoque (Tem que ficar antes ou depois do JWT, mas vamos requerer auth no futuro se necessário)
+app.post('/api/upload-estoque', upload.single('planilha'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Nenhum arquivo enviado.' });
+    }
+    // Opcional: Recarregar a planilha na memória imediatamente
+    const excel = require('../estoque/excel');
+    excel.loadExcel();
+    res.json({ success: true, message: 'Planilha atualizada com sucesso!' });
+  } catch (err) {
+    console.error('Erro ao processar upload da planilha:', err);
+    res.status(500).json({ error: 'Erro interno ao processar a planilha.' });
+  }
+});
 
 // Middleware de autenticação
 function authenticateToken(req, res, next) {
@@ -70,6 +100,78 @@ function getCargosTecnicos() {
 }
 
 // Rotas da API
+
+// --- Tecnicos API ---
+app.get('/api/tecnicos', (req, res) => {
+  try {
+    const cargos = getCargosTecnicos();
+    // retorna um array de objetos { nome, cargo }, filtrando os de BO
+    const tecnicos = Object.keys(cargos)
+      .map(nome => ({ nome, cargo: cargos[nome] }))
+      .filter(t => {
+        const c = String(t.cargo).trim().toUpperCase();
+        return c !== 'BO' && c !== 'B.O' && c !== 'B.O.';
+      });
+    res.json(tecnicos);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Agenda API ---
+app.get('/api/agenda', (req, res) => {
+  try {
+    const { start, end } = req.query;
+    let agendamentos = queries.obterAgendamentos(start, end);
+    
+    // Filtra os eventos de pessoas do BO
+    const cargos = getCargosTecnicos();
+    agendamentos = agendamentos.filter(ev => {
+      const cargo = cargos[ev.tecnico_nome];
+      if (cargo) {
+        const c = String(cargo).trim().toUpperCase();
+        if (c === 'BO' || c === 'B.O' || c === 'B.O.') return false;
+      }
+      return true;
+    });
+
+    res.json(agendamentos);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/agenda', (req, res) => {
+  try {
+    const id = queries.adicionarAgendamento(req.body);
+    res.json({ success: true, id });
+  } catch (error) {
+    console.error('Erro no POST /api/agenda:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/agenda/:id/dia', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data_agendamento } = req.body;
+    queries.atualizarDiaAgendamento(Number(id), data_agendamento);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/agenda/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    queries.removerAgendamento(Number(id));
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro no DELETE /api/agenda:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // POST /api/login
 app.post('/api/login', (req, res) => {
@@ -170,21 +272,37 @@ app.get('/api/avatar/:nome', (req, res) => {
     path.join(__dirname, '../../data/backoffice')
   ];
   
-  const normalize = str => str.replace(/[^a-z0-9]/gi, '');
+  const normalize = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/gi, '').replace(/(.)\1+/g, '$1');
   const procNormal = normalize(nomeProcurado);
 
   for (const dir of dirsToSearch) {
     try {
       if (fs.existsSync(dir)) {
         const files = fs.readdirSync(dir);
-        const file = files.find(f => {
+        let bestMatch = null;
+        let bestScore = -1;
+
+        files.forEach(f => {
           const baseNormal = normalize(path.basename(f, path.extname(f)).toLowerCase());
-          if (!baseNormal) return false;
-          return procNormal.includes(baseNormal) || baseNormal.includes(procNormal);
+          if (!baseNormal) return;
+          
+          let score = 0;
+          if (procNormal === baseNormal) {
+            score = 1000;
+          } else if (procNormal.startsWith(baseNormal)) {
+            score = baseNormal.length;
+          } else if (baseNormal.startsWith(procNormal)) {
+            score = procNormal.length;
+          }
+
+          if (score > bestScore) {
+            bestScore = score;
+            bestMatch = f;
+          }
         });
 
-        if (file) {
-          return res.sendFile(path.join(dir, file));
+        if (bestMatch && bestScore > 0) {
+          return res.sendFile(path.join(dir, bestMatch));
         }
       }
     } catch (err) {

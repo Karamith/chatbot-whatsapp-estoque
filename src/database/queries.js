@@ -437,6 +437,72 @@ function baixarReposicao(item_id) {
   run('UPDATE solicitacao_itens SET status_reposicao = ? WHERE id = ?', ['SOLICITADA_FABRICANTE', item_id]);
 }
 
+// --- Funções da Agenda ---
+
+function obterAgendamentos(dataInicio, dataFim) {
+  const db = getDb();
+  let sql = 'SELECT * FROM agendamentos';
+  const params = [];
+  
+  if (dataInicio && dataFim) {
+    sql += ' WHERE data_agendamento >= ? AND data_agendamento <= ?';
+    params.push(dataInicio, dataFim);
+  }
+  sql += ' ORDER BY data_agendamento ASC, start_time ASC';
+  
+  const stmt = db.prepare(sql);
+  const agendamentos = [];
+  try {
+    stmt.bind(params);
+    while(stmt.step()) agendamentos.push(stmt.getAsObject());
+  } finally {
+    stmt.free();
+  }
+  return agendamentos;
+}
+
+function validarConflitoAgendamento(tecnico_nome, data_agendamento, start_time, end_time, ignore_id = null) {
+  const agendamentosDia = obterAgendamentos(data_agendamento, data_agendamento)
+    .filter(a => a.tecnico_nome === tecnico_nome && a.id !== ignore_id);
+    
+  for (const a of agendamentosDia) {
+    if (start_time < a.end_time && a.start_time < end_time) {
+      throw new Error(`O técnico já possui um agendamento conflitante neste dia (${a.start_time.substring(0,5)} às ${a.end_time.substring(0,5)}).`);
+    }
+  }
+}
+
+function adicionarAgendamento(dados) {
+  validarConflitoAgendamento(dados.tecnico_nome, dados.data_agendamento, dados.start_time, dados.end_time);
+
+  run(
+    'INSERT INTO agendamentos (tecnico_nome, cliente, start_time, end_time, data_agendamento, status, criado_em) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [
+      dados.tecnico_nome,
+      dados.cliente,
+      dados.start_time,
+      dados.end_time,
+      dados.data_agendamento,
+      dados.status,
+      new Date().toISOString()
+    ]
+  );
+  return getLastInsertId();
+}
+
+function atualizarDiaAgendamento(id, nova_data) {
+  const row = queryOne('SELECT * FROM agendamentos WHERE id = ?', [id]);
+  if (row) {
+    validarConflitoAgendamento(row.tecnico_nome, nova_data, row.start_time, row.end_time, id);
+  }
+  run('UPDATE agendamentos SET data_agendamento = ? WHERE id = ?', [nova_data, id]);
+}
+
+function removerAgendamento(id) {
+  run('DELETE FROM agendamentos WHERE id = ?', [id]);
+}
+
+
 module.exports = {
   criarSessao,
   obterSessaoAtiva,
@@ -462,5 +528,9 @@ module.exports = {
   obterTodasReposicoesPendentes,
   buscarReposicoesPendentesTecnico,
   buscarTodasReposicoesPendentesCron,
-  baixarReposicao
+  baixarReposicao,
+  obterAgendamentos,
+  adicionarAgendamento,
+  atualizarDiaAgendamento,
+  removerAgendamento
 };
