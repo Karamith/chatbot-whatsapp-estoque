@@ -130,8 +130,7 @@ function setupApi(app) {
       // 12. Listas de pedidos por status (Kanban)
       const stmtPecasPendentes = db.prepare(`
         SELECT solicitacao_id, codigo_peca, descricao_peca, quantidade_solicitada 
-        FROM solicitacao_itens 
-        WHERE solicitacao_id IN (SELECT id FROM solicitacoes WHERE status_pedido != 'FINALIZADO')
+        FROM solicitacao_itens
       `);
       const pecasPorPedido = {};
       while(stmtPecasPendentes.step()) {
