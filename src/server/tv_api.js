@@ -128,6 +128,19 @@ function setupApi(app) {
       const pecasDiagnosticoList = [];
 
       // 12. Listas de pedidos por status (Kanban)
+      const stmtPecasPendentes = db.prepare(`
+        SELECT solicitacao_id, codigo_peca, quantidade_solicitada 
+        FROM solicitacao_itens 
+        WHERE solicitacao_id IN (SELECT id FROM solicitacoes WHERE status_pedido != 'FINALIZADO')
+      `);
+      const pecasPorPedido = {};
+      while(stmtPecasPendentes.step()) {
+        const item = stmtPecasPendentes.getAsObject();
+        if(!pecasPorPedido[item.solicitacao_id]) pecasPorPedido[item.solicitacao_id] = [];
+        pecasPorPedido[item.solicitacao_id].push(`${item.quantidade_solicitada}x ${item.codigo_peca}`);
+      }
+      stmtPecasPendentes.free();
+
       const stmtTodos = db.prepare(`SELECT id, cliente, tecnico_nome, status_pedido, numero_orcamento, numero_pedido_protheus, nota_fiscal FROM solicitacoes ORDER BY id DESC`);
       const pedidosPorStatus = {
         'PENDENTE': [],
@@ -140,6 +153,7 @@ function setupApi(app) {
       
       while(stmtTodos.step()) {
         const p = stmtTodos.getAsObject();
+        p.pecas_solicitadas = pecasPorPedido[p.id] || [];
         if(pedidosPorStatus[p.status_pedido] !== undefined) {
           pedidosPorStatus[p.status_pedido].push(p);
         }

@@ -213,9 +213,14 @@ function renderData(data) {
     </li>
   `);
 
+  const formatPecas = (pecas) => {
+    if (!pecas || pecas.length === 0) return 'Nenhuma peça';
+    return pecas.join(' | ');
+  };
+
   const pedidosPendentesApenas = data.pedidosPorStatus ? data.pedidosPorStatus['PENDENTE'] : [];
   renderList("list-pedidos-pendentes", pedidosPendentesApenas, item => `
-    <li class="ranking-item" style="animation-delay: ${Math.random() * 0.3}s">
+    <li class="ranking-item" title="${formatPecas(item.pecas_solicitadas)}" style="animation-delay: ${Math.random() * 0.3}s">
       <div class="ranking-info">
         <span class="ranking-title">#PD-${item.id}</span>
         <span class="ranking-subtitle">${item.cliente} / ${item.tecnico_nome}</span>
@@ -239,7 +244,7 @@ function renderData(data) {
     else if (item.numero_orcamento) extra = `<span style="font-size:0.95rem; font-weight:bold; color:var(--text-primary);">ORÇ: ${item.numero_orcamento}</span>`;
 
     return `
-    <li class="ranking-item" style="animation-delay: ${Math.random() * 0.3}s">
+    <li class="ranking-item" title="${formatPecas(item.pecas_solicitadas)}" style="animation-delay: ${Math.random() * 0.3}s">
       <div class="ranking-info">
         <span class="ranking-title">#PD-${item.id}</span>
         <span class="ranking-subtitle">${item.cliente} / ${item.tecnico_nome}</span>
@@ -254,7 +259,7 @@ function renderData(data) {
   renderList("list-nf-emitida", data.pedidosPorStatus ? data.pedidosPorStatus['FINALIZADO'] : [], item => {
     let extra = item.nota_fiscal ? `<span class="ranking-score" style="font-size:0.95rem; font-weight:bold; color:var(--text-primary);">NF: ${item.nota_fiscal}</span>` : '';
     return `
-    <li class="ranking-item" style="animation-delay: ${Math.random() * 0.3}s">
+    <li class="ranking-item" title="${formatPecas(item.pecas_solicitadas)}" style="animation-delay: ${Math.random() * 0.3}s">
       <div class="ranking-info">
         <span class="ranking-title">#PD-${item.id}</span>
         <span class="ranking-subtitle">${item.cliente} / ${item.tecnico_nome}</span>
