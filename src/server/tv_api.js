@@ -145,7 +145,7 @@ function setupApi(app) {
       }
       stmtPecasPendentes.free();
 
-      const stmtTodos = db.prepare(`SELECT id, cliente, tecnico_nome, status_pedido, numero_orcamento, numero_pedido_protheus, nota_fiscal FROM solicitacoes ORDER BY id DESC`);
+      const stmtTodos = db.prepare(`SELECT id, cliente, tecnico_nome, equipamento, status_pedido, numero_orcamento, numero_pedido_protheus, nota_fiscal FROM solicitacoes ORDER BY id DESC`);
       const pedidosPorStatus = {
         'PENDENTE': [],
         'EM_ANALISE': [],

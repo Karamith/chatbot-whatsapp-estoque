@@ -216,16 +216,18 @@ function renderData(data) {
   // Função removida: formatPecas (agora exibidas via modal)
 
   const pedidosPendentesApenas = data.pedidosPorStatus ? data.pedidosPorStatus['PENDENTE'] : [];
-  renderList("list-pedidos-pendentes", pedidosPendentesApenas, item => `
+  renderList("list-pedidos-pendentes", pedidosPendentesApenas, item => {
+    const eq = (item.equipamento || 'N/I').replace(/'/g, "\\'");
+    return `
     <li class="ranking-item" style="animation-delay: ${Math.random() * 0.3}s">
       <div class="ranking-info">
         <span class="ranking-title">
-          <a href="#" onclick="openPecasModal('${encodeURIComponent(JSON.stringify(item.pecas_solicitadas || []))}', ${item.id}); return false;" style="color:var(--accent-color); text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-hover)'" onmouseout="this.style.color='var(--accent-color)'">#PD-${item.id}</a>
+          <a href="#" onclick="openPecasModal('${encodeURIComponent(JSON.stringify(item.pecas_solicitadas || []))}', ${item.id}, '${eq}'); return false;" style="color:var(--accent-color); text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-hover)'" onmouseout="this.style.color='var(--accent-color)'">#PD-${item.id}</a>
         </span>
         <span class="ranking-subtitle">${item.cliente} / ${item.tecnico_nome}</span>
       </div>
     </li>
-  `);
+  `});
 
   let pedidosEmAnalise = [];
   if (data.pedidosPorStatus) {
@@ -242,28 +244,42 @@ function renderData(data) {
     if (item.numero_pedido_protheus) extra = `<span style="font-size:0.95rem; font-weight:bold; color:var(--text-primary);">PED: ${item.numero_pedido_protheus}</span>`;
     else if (item.numero_orcamento) extra = `<span style="font-size:0.95rem; font-weight:bold; color:var(--text-primary);">ORÇ: ${item.numero_orcamento}</span>`;
 
+    let statusColor = 'rgba(255,255,255,0.1)';
+    let textColor = 'var(--text-primary)';
+    if (item.status_pedido === 'APROVADO') {
+      statusColor = 'var(--success-color)';
+      textColor = '#000';
+    } else if (item.status_pedido === 'ORCAMENTO_ENVIADO' || item.status_pedido === 'EM_ANALISE') {
+      statusColor = 'var(--warning-color)';
+      textColor = '#000';
+    }
+
+    const eq = (item.equipamento || 'N/I').replace(/'/g, "\\'");
+
     return `
     <li class="ranking-item" style="animation-delay: ${Math.random() * 0.3}s">
       <div class="ranking-info">
         <span class="ranking-title">
-          <a href="#" onclick="openPecasModal('${encodeURIComponent(JSON.stringify(item.pecas_solicitadas || []))}', ${item.id}); return false;" style="color:var(--accent-color); text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-hover)'" onmouseout="this.style.color='var(--accent-color)'">#PD-${item.id}</a>
+          <a href="#" onclick="openPecasModal('${encodeURIComponent(JSON.stringify(item.pecas_solicitadas || []))}', ${item.id}, '${eq}'); return false;" style="color:var(--accent-color); text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-hover)'" onmouseout="this.style.color='var(--accent-color)'">#PD-${item.id}</a>
         </span>
         <span class="ranking-subtitle">${item.cliente} / ${item.tecnico_nome}</span>
       </div>
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+        <span style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:2px;">${item.equipamento || ''}</span>
         ${extra}
-        <span class="ranking-score" style="font-size:0.75rem; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">${item.status_pedido.replace('_', ' ')}</span>
+        <span class="ranking-score" style="font-size:0.75rem; background:${statusColor}; color:${textColor}; padding:2px 6px; border-radius:4px; font-weight:bold;">${item.status_pedido.replace('_', ' ')}</span>
       </div>
     </li>
   `});
 
   renderList("list-nf-emitida", data.pedidosPorStatus ? data.pedidosPorStatus['FINALIZADO'] : [], item => {
-    let extra = item.nota_fiscal ? `<span class="ranking-score" style="font-size:0.95rem; font-weight:bold; color:var(--text-primary);">NF: ${item.nota_fiscal}</span>` : '';
+    let extra = item.nota_fiscal ? `<span class="ranking-score" style="font-size:0.95rem; font-weight:bold; color:var(--success-color); background:rgba(42, 203, 114, 0.1); padding:4px 8px; border-radius:6px; border: 1px solid var(--success-color);">NF: ${item.nota_fiscal}</span>` : '';
+    const eq = (item.equipamento || 'N/I').replace(/'/g, "\\'");
     return `
     <li class="ranking-item" style="animation-delay: ${Math.random() * 0.3}s">
       <div class="ranking-info">
         <span class="ranking-title">
-          <a href="#" onclick="openPecasModal('${encodeURIComponent(JSON.stringify(item.pecas_solicitadas || []))}', ${item.id}); return false;" style="color:var(--accent-color); text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-hover)'" onmouseout="this.style.color='var(--accent-color)'">#PD-${item.id}</a>
+          <a href="#" onclick="openPecasModal('${encodeURIComponent(JSON.stringify(item.pecas_solicitadas || []))}', ${item.id}, '${eq}'); return false;" style="color:var(--accent-color); text-decoration:none; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-hover)'" onmouseout="this.style.color='var(--accent-color)'">#PD-${item.id}</a>
         </span>
         <span class="ranking-subtitle">${item.cliente} / ${item.tecnico_nome}</span>
       </div>
@@ -771,12 +787,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Controle do Modal de Peças
-function openPecasModal(pecasJsonEncoded, id) {
+function openPecasModal(pecasJsonEncoded, id, equipamento) {
   try {
     const pecasStr = decodeURIComponent(pecasJsonEncoded);
     const pecas = JSON.parse(pecasStr);
     
-    document.getElementById('pecas-modal-title').innerText = `Peças Solicitadas (#PD-${id})`;
+    document.getElementById('pecas-modal-title').innerHTML = `Peças Solicitadas (#PD-${id}) <span style="display:block; font-size:0.85rem; color:var(--text-secondary); margin-top:4px;">Máquina: ${equipamento}</span>`;
     
     const body = document.getElementById('pecas-modal-body');
     if (!pecas || pecas.length === 0) {
