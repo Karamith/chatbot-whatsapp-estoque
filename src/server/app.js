@@ -293,6 +293,10 @@ app.get('/api/avatar/:nome', (req, res) => {
             score = baseNormal.length;
           } else if (baseNormal.startsWith(procNormal)) {
             score = procNormal.length;
+          } else if (baseNormal.includes(procNormal)) {
+            score = procNormal.length - 1;
+          } else if (procNormal.includes(baseNormal)) {
+            score = baseNormal.length - 1;
           }
 
           if (score > bestScore) {
