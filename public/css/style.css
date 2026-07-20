@@ -372,7 +372,7 @@ body {
 /* Panels */
 .panels-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: 22fr 22fr 28fr 28fr;
   gap: 30px;
 }
 
