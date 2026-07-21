@@ -8,6 +8,8 @@ let dadosClientes = [];
 
 function normalizarCliente(nome) {
   return String(nome || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .trim()
     .replace(/\s+/g, ' ')
     .toUpperCase();
