@@ -322,8 +322,12 @@ async function handleColetandoQuantidades(sessao, texto, client, telefone) {
         session.setEstado(sessao.id, 'alerta_redundancia');
         enviarMensagem(client, telefone, MSG.REDUNDANCY_ALERT(itensRedundantes.join('\n')));
       } else {
-        session.setEstado(sessao.id, 'pergunta_md');
-        enviarMensagem(client, telefone, MSG.ASK_MD);
+        if (sessao.modelo && sessao.modelo.toUpperCase().includes('ABG')) {
+          irParaConfirmacaoABG(sessao, client, telefone);
+        } else {
+          session.setEstado(sessao.id, 'pergunta_md');
+          enviarMensagem(client, telefone, MSG.ASK_MD);
+        }
       }
     }
   }
@@ -331,8 +335,12 @@ async function handleColetandoQuantidades(sessao, texto, client, telefone) {
 
 async function handleAlertaRedundancia(sessao, texto, client, telefone) {
   if (texto === '1') {
-    session.setEstado(sessao.id, 'pergunta_md');
-    enviarMensagem(client, telefone, MSG.ASK_MD);
+    if (sessao.modelo && sessao.modelo.toUpperCase().includes('ABG')) {
+      irParaConfirmacaoABG(sessao, client, telefone);
+    } else {
+      session.setEstado(sessao.id, 'pergunta_md');
+      enviarMensagem(client, telefone, MSG.ASK_MD);
+    }
   } else if (texto === '2') {
     enviarMensagem(client, telefone, "Solicitação cancelada.");
     voltarParaMenu(sessao, client, telefone);
@@ -410,6 +418,29 @@ async function handlePerguntaMotivo(sessao, texto, client, telefone) {
       const isImport = i.importacao ? '[! Importar] ' : '';
       const isRedundante = i.alerta_redundancia ? `[ALERTA: Solicitada há menos de 15 dias por ${i.alerta_redundancia}] ` : '';
       resumoTexto += `- ${isImport}${isRedundante}${i.codigo} | ${i.descricao} | Quantidade: ${i.quantidadeDesejada}\n`;
+    }
+  });
+
+  const preview = MSG.REQUEST_SUMMARY(sessao.tecnico_nome, sessao.cliente, sessao.modelo, resumoTexto, sessao.motivo, sessao.md, sessao.urgencia);
+  
+  session.setEstado(sessao.id, 'confirmacao');
+  enviarMensagem(client, telefone, preview);
+}
+
+function irParaConfirmacaoABG(sessao, client, telefone) {
+  sessao.md = 'Não';
+  sessao.urgencia = 'Sob Demanda';
+  sessao.motivo = 'N/A';
+  
+  session.setRespostasCheckout(sessao.id, sessao.motivo, sessao.md, sessao.urgencia);
+  
+  let resumoTexto = '';
+  sessao.itens_consultados.forEach(i => {
+    if (i.quantidadeDesejada > 0) {
+      const isImport = i.importacao ? '[! Importar] ' : '';
+      const isRedundante = i.alerta_redundancia ? `[ALERTA: Solicitada há menos de 15 dias por ${i.alerta_redundancia}] ` : '';
+      const isEdicula = i.isEdicula ? `[EDÍCULA - Loc: ${i.localizacao || 'N/A'}] ` : '';
+      resumoTexto += `- ${isImport}${isRedundante}${isEdicula}${i.codigo} | ${i.descricao} | Quantidade: ${i.quantidadeDesejada}\n`;
     }
   });
 
