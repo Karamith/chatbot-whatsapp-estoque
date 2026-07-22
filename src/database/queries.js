@@ -508,7 +508,7 @@ function removerAgendamento(id) {
 
 function obterTecnicosMalas() {
   const db = getDb();
-  const stmt = db.prepare('SELECT nome, mala FROM tecnicos WHERE mala IS NOT NULL AND mala != ""');
+  const stmt = db.prepare("SELECT nome, mala FROM tecnicos WHERE mala IS NOT NULL AND mala != ''");
   try {
     const res = [];
     while (stmt.step()) {

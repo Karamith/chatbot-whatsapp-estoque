@@ -467,17 +467,17 @@ function inicializarJigsETecnicos() {
     }
   }
 
-  const totalTecnicos = getScalar('SELECT COUNT(*) AS total FROM tecnicos') || 0;
-  if (totalTecnicos === 0) {
-    const tecnicosPath = path.resolve('./data/tecnicos.xlsx');
-    if (fs.existsSync(tecnicosPath)) {
-      console.log('Inicializando tabela tecnicos a partir do Excel...');
-      try {
-        const wb = xlsx.readFile(tecnicosPath);
-        const sheetName = wb.SheetNames[0];
-        const dados = xlsx.utils.sheet_to_json(wb.Sheets[sheetName]);
-        
-        db.run('BEGIN TRANSACTION');
+  const tecnicosPath = path.resolve('./data/tecnicos.xlsx');
+  if (fs.existsSync(tecnicosPath)) {
+    console.log('Inicializando/Atualizando tabela tecnicos a partir do Excel...');
+    try {
+      const wb = xlsx.readFile(tecnicosPath);
+      const sheetName = wb.SheetNames[0];
+      const dados = xlsx.utils.sheet_to_json(wb.Sheets[sheetName]);
+      
+      db.run('BEGIN TRANSACTION');
+      db.run('DELETE FROM tecnicos');
+
         dados.forEach(row => {
           if (row['NOME']) {
             run(`
@@ -498,7 +498,6 @@ function inicializarJigsETecnicos() {
         console.error('Erro ao inicializar tecnicos:', e.message);
       }
     }
-  }
 
   const totalBackoffice = getScalar('SELECT COUNT(*) AS total FROM backoffice') || 0;
   if (totalBackoffice === 0) {
