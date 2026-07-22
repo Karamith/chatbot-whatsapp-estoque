@@ -568,9 +568,9 @@ function obterRequisicoes() {
 
 function processarAcaoRequisicao(id, acao, infoExtra) {
   if (acao === 'baixa') {
-    run(\`UPDATE requisicoes SET status = 'BAIXADA', nota_fiscal = ? WHERE id = ?\`, [infoExtra, id]);
+    run(`UPDATE requisicoes SET status = 'BAIXADA', nota_fiscal = ? WHERE id = ?`, [infoExtra, id]);
   } else if (acao === 'retorno') {
-    run(\`UPDATE requisicoes SET status = 'RETORNADA', numero_retorno = ? WHERE id = ?\`, [infoExtra, id]);
+    run(`UPDATE requisicoes SET status = 'RETORNADA', numero_retorno = ? WHERE id = ?`, [infoExtra, id]);
   }
 }
 
