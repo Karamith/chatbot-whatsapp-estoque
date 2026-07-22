@@ -108,12 +108,13 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
 
+    const displayId = pedido.is_importacao === 1 ? `#PDI-${String(pedido.parent_id || pedido.id).padStart(4, '0')}` : `#PD-${String(pedido.id).padStart(4, '0')}`;
     card.innerHTML = `
       ${mdIndicator}
       <div class="bo-card-row" style="gap: 8px;">
         <div class="tech-info-flex" style="white-space: nowrap; flex-shrink: 0;">
           <span class="icon" style="margin-right: 4px;">📋</span> 
-          <span class="bo-value large" style="font-size: 1rem;">#PD-${String(pedido.id).padStart(4, '0')}</span>
+          <span class="bo-value large" style="font-size: 1rem;">${displayId}</span>
         </div>
         <div style="display: flex; align-items: center; gap: 4px; flex-wrap: nowrap;">
           ${pedido.itens && pedido.itens.some(i => i.descricao_peca && i.descricao_peca.includes('[! Importar]')) ? '<span class="bo-role-badge" style="border-color: #F59E0B; color: #F59E0B; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">⚠️ IMPORTAR</span>' : ''}
@@ -226,9 +227,58 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   window.importarPedido = function(id) {
-    if (confirm("Mover este pedido para Importação? Ele sairá do Kanban principal.")) {
-      updatePedidoStatus(id, 'IMPORTACAO');
+    const pedido = window.pedidosKanban.find(p => p.id === id);
+    if (!pedido) return alert('Pedido não encontrado');
+    
+    document.getElementById('import-solicitacao-id').value = pedido.id;
+    
+    const container = document.getElementById('import-pecas-container');
+    container.innerHTML = '';
+    
+    if (pedido.itens && pedido.itens.length > 0) {
+      pedido.itens.forEach(i => {
+        const isImportar = i.descricao_peca && i.descricao_peca.includes('[! Importar]');
+        container.innerHTML += `
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
+            <input type="checkbox" name="import-peca" value="${i.id}" ${isImportar ? 'checked' : ''} style="width: 16px; height: 16px; accent-color: #F59E0B;">
+            <b>${i.codigo_peca}</b> - ${i.descricao_peca || ''} (Qtd: ${i.quantidade})
+          </label>
+        `;
+      });
+    } else {
+      container.innerHTML = '<div style="color: #9CA3AF;">Nenhum item neste pedido.</div>';
     }
+    
+    document.getElementById('modal-importacao-split').style.display = 'flex';
+  };
+
+  window.salvarSplitImportacao = function() {
+    const id = document.getElementById('import-solicitacao-id').value;
+    const checkboxes = document.querySelectorAll('input[name="import-peca"]:checked');
+    const itensSelecionadosIds = Array.from(checkboxes).map(cb => Number(cb.value));
+    
+    if (itensSelecionadosIds.length === 0) {
+      return alert('Selecione ao menos uma peça para desmembrar.');
+    }
+    
+    fetch(`/api/pedidos/${id}/split-importacao`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ itensSelecionadosIds })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById('modal-importacao-split').style.display = 'none';
+        fetchPedidos();
+      } else {
+        alert('Erro ao separar importação: ' + data.error);
+      }
+    })
+    .catch(err => console.error(err));
   };
 
   window.reprovarPedido = function(id) {

@@ -87,6 +87,8 @@
       <thead>
         <tr>
           <th>ID Pedido</th>
+          <th>PO</th>
+          <th>ETA</th>
           <th>Cliente / Máquina</th>
           <th>Técnico</th>
           <th>Peças Solicitadas</th>
@@ -128,8 +130,17 @@
           }
           pecasHtml += '</ul>';
 
+          const displayId = pedido.is_importacao === 1 ? `#PDI-${String(pedido.parent_id || pedido.id).padStart(4, '0')}` : `#PD-${String(pedido.id).padStart(4, '0')}`;
+          
           tr.innerHTML = `
-            <td>#PD-${String(pedido.id).padStart(4, '0')}</td>
+            <td>${displayId}</td>
+            <td>
+              <input type="text" id="po-${pedido.id}" value="${pedido.po || ''}" placeholder="Inserir PO" style="width: 100px; padding: 4px; background: var(--bg-card); border: 1px solid var(--border-color); color: white; border-radius: 4px;">
+            </td>
+            <td>
+              <input type="text" id="eta-${pedido.id}" value="${pedido.eta || ''}" placeholder="Inserir ETA" style="width: 100px; padding: 4px; background: var(--bg-card); border: 1px solid var(--border-color); color: white; border-radius: 4px;">
+              <button onclick="window.salvarPOeETA(${pedido.id})" style="background: #374151; color: white; border: none; padding: 4px; border-radius: 4px; cursor: pointer; margin-left: 4px; font-size: 0.75rem;" title="Salvar PO e ETA">💾</button>
+            </td>
             <td>
               <div style="font-weight: 600;">${pedido.cliente}</div>
               <div style="font-size: 0.8rem; color: #9CA3AF;">${pedido.modelo || 'N/A'}</div>
@@ -152,25 +163,48 @@
     document.addEventListener('DOMContentLoaded', carregarImportacoes);
 
     window.retornarParaKanban = function(id) {
-      if (confirm("As peças chegaram? O pedido retornará para o Kanban na coluna EM PROCESSAMENTO.")) {
-        fetch(`/api/pedidos/${id}/status`, {
-          method: 'PUT',
+      if (confirm("As peças chegaram? O pedido retornará para o fluxo normal e o técnico será avisado.")) {
+        fetch(`/api/pedidos/${id}/chegaram`, {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ status: 'EM_PROCESSAMENTO' })
+          }
         })
         .then(res => res.json())
         .then(data => {
           if (data.success) {
+            alert('Aviso enviado e pedido retornado com sucesso!');
+            document.getElementById('importacoes-body').innerHTML = '';
             carregarImportacoes(); // recarrega a lista
           } else {
-            alert('Erro ao atualizar o pedido.');
+            alert('Erro ao atualizar o pedido: ' + data.error);
           }
         })
         .catch(err => console.error(err));
       }
+    };
+
+    window.salvarPOeETA = function(id) {
+      const po = document.getElementById(`po-${id}`).value;
+      const eta = document.getElementById(`eta-${id}`).value;
+      fetch(`/api/pedidos/${id}/importacao-info`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ po, eta })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('PO e ETA salvos com sucesso.');
+        } else {
+          alert('Erro ao salvar: ' + data.error);
+        }
+      })
+      .catch(err => console.error(err));
     };
   </script>
 </body>

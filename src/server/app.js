@@ -303,6 +303,82 @@ app.get('/api/pedidos', authenticateToken, (req, res) => {
   }
 });
 
+// POST /api/pedidos/:id/split-importacao
+app.post('/api/pedidos/:id/split-importacao', authenticateToken, (req, res) => {
+  try {
+    const originalId = Number(req.params.id);
+    const { itensSelecionadosIds } = req.body;
+    if (!itensSelecionadosIds || itensSelecionadosIds.length === 0) {
+      return res.status(400).json({ error: 'Nenhum item selecionado.' });
+    }
+    queries.separarPedidoImportacao(originalId, itensSelecionadosIds);
+    if (app.get('io')) app.get('io').emit('kanban_update');
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao separar importação:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/pedidos/:id/chegaram
+app.post('/api/pedidos/:id/chegaram', authenticateToken, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const pedido = queries.buscarPedidoPorId(id);
+    if (!pedido) return res.status(404).json({ error: 'Pedido não encontrado.' });
+
+    let novoStatus = 'APROVADO';
+    if (pedido.modelo && pedido.modelo.includes('CIF')) {
+      novoStatus = 'EM_ANALISE';
+    }
+
+    queries.atualizarStatusPedido(id, novoStatus);
+
+    try {
+      const client = getClient();
+      if (client && pedido.telefone_tecnico) {
+        const pedidosComItens = queries.buscarPedidos();
+        const pedidoCompleto = pedidosComItens.find(p => p.id === id);
+        let pecasMsg = '';
+        if (pedidoCompleto && pedidoCompleto.itens) {
+          pecasMsg = pedidoCompleto.itens.map(i => `- ${i.codigo_peca} (${i.quantidade}x)`).join('\\n');
+        }
+
+        let txt = `📦 *As peças de importação chegaram!*\n`;
+        txt += `*Pedido:* #PDI-${pedido.parent_id || pedido.id}\n`;
+        txt += `*Cliente:* ${pedido.cliente}\n`;
+        txt += `*Máquina:* ${pedido.modelo || 'N/A'}\n\n`;
+        txt += `*Peças:*\n${pecasMsg}\n\n`;
+        txt += `O pedido foi movido para o fluxo de atendimento.`;
+        
+        await client.sendMessage(pedido.telefone_tecnico + '@c.us', txt);
+      }
+    } catch (msgErr) {
+      console.error('Erro ao enviar WhatsApp de chegada de importação:', msgErr);
+    }
+
+    if (app.get('io')) app.get('io').emit('kanban_update');
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao registrar peças chegaram:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /api/pedidos/:id/importacao-info
+app.put('/api/pedidos/:id/importacao-info', authenticateToken, (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { po, eta } = req.body;
+    queries.atualizarPOeETA(id, po, eta);
+    if (app.get('io')) app.get('io').emit('kanban_update');
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao atualizar PO/ETA:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // GET /api/avatar/:nome
 app.get('/api/avatar/:nome', (req, res) => {
   const nomeProcurado = req.params.nome.toLowerCase().trim();

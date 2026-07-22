@@ -296,6 +296,7 @@ function buscarPedidos() {
   const stmt = db.prepare(`
     SELECT s.*, 
            json_group_array(json_object(
+             'id', i.id,
              'codigo_peca', i.codigo_peca,
              'descricao_peca', i.descricao_peca,
              'quantidade', i.quantidade_solicitada
@@ -574,6 +575,47 @@ function processarAcaoRequisicao(id, acao, infoExtra) {
   }
 }
 
+function separarPedidoImportacao(id, itensSelecionadosIds) {
+  const db = getDb();
+  try {
+    db.run('BEGIN TRANSACTION');
+
+    const solicitacaoOriginal = queryOne('SELECT * FROM solicitacoes WHERE id = ?', [id]);
+    if (!solicitacaoOriginal) throw new Error('Pedido não encontrado.');
+
+    runNoSave(`
+      INSERT INTO solicitacoes (
+        sessao_id, tecnico_nome, cliente, modelo, status_envio, criada_em,
+        telefone_tecnico, status_pedido, motivo, md, urgencia, responsavel_baixa,
+        parent_id, is_importacao
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      solicitacaoOriginal.sessao_id, solicitacaoOriginal.tecnico_nome, solicitacaoOriginal.cliente,
+      solicitacaoOriginal.modelo, solicitacaoOriginal.status_envio, new Date().toISOString(),
+      solicitacaoOriginal.telefone_tecnico, 'IMPORTACAO', solicitacaoOriginal.motivo,
+      solicitacaoOriginal.md, solicitacaoOriginal.urgencia, solicitacaoOriginal.responsavel_baixa,
+      solicitacaoOriginal.id, 1
+    ]);
+
+    const novoId = getLastInsertId();
+
+    for (const itemId of itensSelecionadosIds) {
+      runNoSave(`UPDATE solicitacao_itens SET solicitacao_id = ? WHERE id = ?`, [novoId, itemId]);
+    }
+
+    db.run('COMMIT');
+    saveDb();
+    return novoId;
+  } catch (error) {
+    try { db.run('ROLLBACK'); } catch (_) {}
+    throw error;
+  }
+}
+
+function atualizarPOeETA(id, po, eta) {
+  run(`UPDATE solicitacoes SET po = ?, eta = ? WHERE id = ?`, [po, eta, id]);
+}
+
 module.exports = {
   criarSessao,
   obterSessaoAtiva,
@@ -602,11 +644,12 @@ module.exports = {
   baixarReposicao,
   obterAgendamentos,
   adicionarAgendamento,
-  adicionarAgendamento,
   atualizarDiaAgendamento,
   removerAgendamento,
   obterTecnicosMalas,
   criarRequisicao,
   obterRequisicoes,
-  processarAcaoRequisicao
+  processarAcaoRequisicao,
+  separarPedidoImportacao,
+  atualizarPOeETA
 };

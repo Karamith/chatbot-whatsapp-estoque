@@ -30,6 +30,7 @@ async function initDatabase() {
   migrarSchemaBackoffice();
   migrarSchemaNotaFiscal();
   migrarSchemaImportacao();
+  migrarSchemaImportacaoSplit();
   migrarSchemaAgenda();
   migrarSchemaRequisicoes();
   migrarJsonSeNecessario();
@@ -272,6 +273,24 @@ function migrarSchemaImportacao() {
   const colunasItens = listarColunas('solicitacao_itens');
   if (colunasItens.length > 0 && !colunasItens.includes('importacao')) {
     db.run('ALTER TABLE solicitacao_itens ADD COLUMN importacao INTEGER DEFAULT 0');
+  }
+}
+
+function migrarSchemaImportacaoSplit() {
+  const colunas = listarColunas('solicitacoes');
+  if (colunas.length > 0) {
+    if (!colunas.includes('parent_id')) {
+      db.run('ALTER TABLE solicitacoes ADD COLUMN parent_id INTEGER');
+    }
+    if (!colunas.includes('is_importacao')) {
+      db.run('ALTER TABLE solicitacoes ADD COLUMN is_importacao INTEGER DEFAULT 0');
+    }
+    if (!colunas.includes('po')) {
+      db.run('ALTER TABLE solicitacoes ADD COLUMN po TEXT');
+    }
+    if (!colunas.includes('eta')) {
+      db.run('ALTER TABLE solicitacoes ADD COLUMN eta TEXT');
+    }
   }
 }
 
