@@ -494,9 +494,19 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(data => {
         const malaSelect = document.getElementById('req-mala-select');
         malaSelect.innerHTML = '<option value="">Selecione...</option>';
-        data.forEach(t => {
-          malaSelect.innerHTML += `<option value="${t.mala}" data-nome="${t.nome}">${t.mala} - ${t.nome}</option>`;
-        });
+        if (data.error) {
+          alert('Erro na API de malas: ' + data.error);
+          return;
+        }
+        if (Array.isArray(data)) {
+          data.forEach(t => {
+            malaSelect.innerHTML += `<option value="${t.mala}" data-nome="${t.nome}">${t.mala} - ${t.nome}</option>`;
+          });
+        }
+      })
+      .catch(e => {
+        console.error('Erro no fetch de malas:', e);
+        alert('Erro de conexão ao buscar malas.');
       });
 
     document.getElementById('modal-requisicao').style.display = 'flex';
