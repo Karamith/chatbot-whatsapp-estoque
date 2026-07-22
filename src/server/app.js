@@ -52,6 +52,7 @@ app.use(express.static(path.join(__dirname, '../../public'), {
 // Rota estática para servir avatares e logo do Backoffice
 app.use('/bo-assets', express.static(path.join(__dirname, '../../data/backoffice'))); // Servir arquivos estáticos do Dashboard
 app.use('/avatares', express.static(path.join(__dirname, '../../data/avatares'))); // Servir fotos dos técnicos
+app.use('/icons', express.static(path.join(__dirname, '../../data/Icons'))); // Servir ícones
 
 // Inicializa as rotas da TV (Dashboard Legado)
 setupApi(app);

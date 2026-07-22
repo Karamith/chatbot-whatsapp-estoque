@@ -108,6 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
 
+    const isImportacao = pedido.is_importacao === 1 || (pedido.itens && pedido.itens.some(i => i.descricao_peca && i.descricao_peca.includes('[! Importar]')));
+    const tipoEntregaIcon = isImportacao 
+      ? '<img src="/icons/importacao.svg" alt="Importação" title="Importação" style="width: 28px; height: 28px;">'
+      : '<img src="/icons/pronta_entrega.svg" alt="Pronta Entrega" title="Pronta Entrega" style="width: 28px; height: 28px;">';
+
     const displayId = pedido.is_importacao === 1 ? `#PDI-${String(pedido.parent_id || pedido.id).padStart(4, '0')}` : `#PD-${String(pedido.id).padStart(4, '0')}`;
     card.innerHTML = `
       ${mdIndicator}
@@ -139,7 +144,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="bo-value" style="font-size: 0.85rem;">${pedido.tecnico_nome || 'N/A'}</span>
           </div>
         </div>
-        ${pedido.motivo && pedido.motivo.toLowerCase().includes('diagn') ? '<img src="/bo-assets/diagnostico.png" alt="Diagnóstico" title="Peças para Diagnóstico" style="width: 32px; height: 32px; object-fit: contain;">' : ''}
+        <div style="display: flex; gap: 8px; align-items: center;">
+          ${tipoEntregaIcon}
+          ${pedido.motivo && pedido.motivo.toLowerCase().includes('diagn') ? '<img src="/bo-assets/diagnostico.png" alt="Diagnóstico" title="Peças para Diagnóstico" style="width: 32px; height: 32px; object-fit: contain;">' : ''}
+        </div>
         <span class="bo-role-badge" style="border-color: ${cargoColor}; color: ${cargoColor};">${cargo}</span>
       </div>
       <div class="bo-card-grid">
