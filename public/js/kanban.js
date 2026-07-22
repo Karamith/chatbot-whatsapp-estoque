@@ -411,9 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchPedidos();
       }
     });
-    });
   }
-
   window.abrirModalRequisicao = function(id) {
     const pedido = window.pedidosKanban.find(p => p.id === id);
     if (!pedido) return alert('Pedido não encontrado');
