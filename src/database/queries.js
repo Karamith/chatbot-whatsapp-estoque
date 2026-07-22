@@ -503,6 +503,77 @@ function removerAgendamento(id) {
 }
 
 
+// --- Requisições ---
+
+function obterTecnicosMalas() {
+  const db = getDb();
+  const stmt = db.prepare('SELECT nome, mala FROM tecnicos WHERE mala IS NOT NULL AND mala != ""');
+  try {
+    const res = [];
+    while (stmt.step()) {
+      res.push(stmt.getAsObject());
+    }
+    return res;
+  } finally {
+    stmt.free();
+  }
+}
+
+function criarRequisicao(dados) {
+  const { solicitacao_id, numero_requisicao, itens, mala, tecnico_nome, cliente, maquina, valor_peca } = dados;
+  const db = getDb();
+  
+  try {
+    db.run('BEGIN TRANSACTION');
+    
+    for (const item of itens) {
+      runNoSave(`
+        INSERT INTO requisicoes (
+          solicitacao_id, numero_requisicao, codigo_peca, descricao_peca, quantidade, 
+          mala, tecnico_nome, cliente, maquina, valor_peca, status, criada_em
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDENTE', ?)
+      `, [
+        solicitacao_id, numero_requisicao, item.codigo_peca, item.descricao_peca, item.quantidade,
+        mala, tecnico_nome, cliente, maquina, valor_peca, new Date().toISOString()
+      ]);
+    }
+
+    runNoSave(`
+      UPDATE solicitacoes 
+      SET tag_requisicao = ? 
+      WHERE id = ?
+    `, [`REQ ${numero_requisicao}`, solicitacao_id]);
+
+    db.run('COMMIT');
+    saveDb();
+  } catch (error) {
+    try { db.run('ROLLBACK'); } catch (_) {}
+    throw error;
+  }
+}
+
+function obterRequisicoes() {
+  const db = getDb();
+  const stmt = db.prepare('SELECT * FROM requisicoes ORDER BY id DESC');
+  try {
+    const res = [];
+    while (stmt.step()) {
+      res.push(stmt.getAsObject());
+    }
+    return res;
+  } finally {
+    stmt.free();
+  }
+}
+
+function processarAcaoRequisicao(id, acao, infoExtra) {
+  if (acao === 'baixa') {
+    run(\`UPDATE requisicoes SET status = 'BAIXADA', nota_fiscal = ? WHERE id = ?\`, [infoExtra, id]);
+  } else if (acao === 'retorno') {
+    run(\`UPDATE requisicoes SET status = 'RETORNADA', numero_retorno = ? WHERE id = ?\`, [infoExtra, id]);
+  }
+}
+
 module.exports = {
   criarSessao,
   obterSessaoAtiva,
@@ -531,6 +602,11 @@ module.exports = {
   baixarReposicao,
   obterAgendamentos,
   adicionarAgendamento,
+  adicionarAgendamento,
   atualizarDiaAgendamento,
-  removerAgendamento
+  removerAgendamento,
+  obterTecnicosMalas,
+  criarRequisicao,
+  obterRequisicoes,
+  processarAcaoRequisicao
 };

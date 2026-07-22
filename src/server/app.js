@@ -248,6 +248,45 @@ app.post('/api/clientes-reload', (req, res) => {
     res.status(500).json({ error: 'Erro ao recarregar a planilha.' });
   }
 });
+// --- Requisições API ---
+app.get('/api/tecnicos-malas', authenticateToken, (req, res) => {
+  try {
+    const tecnicos = queries.obterTecnicosMalas();
+    res.json(tecnicos);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/requisicoes', authenticateToken, (req, res) => {
+  try {
+    queries.criarRequisicao(req.body);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao criar requisição:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/requisicoes/pendentes', authenticateToken, (req, res) => {
+  try {
+    const requisicoes = queries.obterRequisicoes();
+    res.json(requisicoes);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/requisicoes/:id/acao', authenticateToken, (req, res) => {
+  try {
+    const { acao, infoExtra } = req.body;
+    queries.processarAcaoRequisicao(req.params.id, acao, infoExtra);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Erro ao processar ação de requisição:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // GET /api/pedidos
 app.get('/api/pedidos', authenticateToken, (req, res) => {

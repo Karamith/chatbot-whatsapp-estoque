@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return res.json();
     })
     .then(data => {
+      window.pedidosKanban = data;
       renderKanban(data);
     })
     .catch(err => console.error('Erro ao buscar pedidos:', err));
@@ -117,11 +118,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="display: flex; align-items: center; gap: 4px; flex-wrap: nowrap;">
           ${pedido.itens && pedido.itens.some(i => i.descricao_peca && i.descricao_peca.includes('[! Importar]')) ? '<span class="bo-role-badge" style="border-color: #F59E0B; color: #F59E0B; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">⚠️ IMPORTAR</span>' : ''}
           ${isMD ? '<span class="bo-role-badge" style="border-color: #EF4444; color: #EF4444; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">MD</span>' : ''}
+          ${pedido.tag_requisicao ? `<span class="bo-role-badge" style="border-color: #8B5CF6; color: #8B5CF6; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">${pedido.tag_requisicao}</span>` : ''}
           <span class="bo-role-badge" style="border-color: ${statusColor}; color: ${statusColor}; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">${pedido.status_pedido.replace('_', ' ')}</span>
           <div style="position: relative; display: inline-block;">
             <span class="btn-dots" style="color: var(--text-secondary); cursor: pointer; margin-left: 2px; padding: 0 6px;">⋮</span>
             <div class="dropdown-reprovado" style="display: none; position: absolute; right: 0; top: 100%; background: #2A2D35; border: 1px solid #374151; border-radius: 4px; padding: 4px; z-index: 10; box-shadow: 0 4px 6px rgba(0,0,0,0.3); min-width: 100px;">
               <button onclick="window.importarPedido(${pedido.id})" style="background: #F59E0B; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; white-space: nowrap; width: 100%; margin-bottom: 4px;">Importação</button>
+              <button onclick="window.abrirModalRequisicao(${pedido.id})" style="background: #8B5CF6; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; white-space: nowrap; width: 100%; margin-bottom: 4px;">Requisição</button>
               <button onclick="window.reprovarPedido(${pedido.id})" style="background: #EF4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; white-space: nowrap; width: 100%;">Reprovado</button>
             </div>
           </div>
@@ -408,5 +411,91 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchPedidos();
       }
     });
+    });
   }
+
+  window.abrirModalRequisicao = function(id) {
+    const pedido = window.pedidosKanban.find(p => p.id === id);
+    if (!pedido) return alert('Pedido não encontrado');
+
+    document.getElementById('req-solicitacao-id').value = pedido.id;
+    document.getElementById('req-numero').value = '';
+    document.getElementById('req-valor').value = '';
+    document.getElementById('req-cliente').value = pedido.cliente || '';
+    document.getElementById('req-maquina').value = pedido.modelo || '';
+
+    const pecaSelect = document.getElementById('req-peca-select');
+    pecaSelect.innerHTML = '';
+    if (pedido.itens && pedido.itens.length > 1) {
+      pecaSelect.innerHTML += `<option value="TODAS">Todas as peças</option>`;
+    }
+    if (pedido.itens) {
+      pedido.itens.forEach((i, idx) => {
+        pecaSelect.innerHTML += `<option value="${idx}">${i.codigo_peca} - ${i.descricao_peca || 'Sem descrição'} (Qtd: ${i.quantidade_solicitada || 1})</option>`;
+      });
+    }
+
+    fetch('/api/tecnicos-malas', { headers: { 'Authorization': `Bearer ${token}` } })
+      .then(res => res.json())
+      .then(data => {
+        const malaSelect = document.getElementById('req-mala-select');
+        malaSelect.innerHTML = '<option value="">Selecione...</option>';
+        data.forEach(t => {
+          malaSelect.innerHTML += `<option value="${t.mala}" data-nome="${t.nome}">${t.mala} - ${t.nome}</option>`;
+        });
+      });
+
+    document.getElementById('modal-requisicao').style.display = 'flex';
+  };
+
+  window.salvarRequisicao = function() {
+    const solicitacao_id = document.getElementById('req-solicitacao-id').value;
+    const numero_requisicao = document.getElementById('req-numero').value;
+    const valor_peca = document.getElementById('req-valor').value;
+    const malaSelect = document.getElementById('req-mala-select');
+    const mala = malaSelect.value;
+    const tecnico_nome = malaSelect.options[malaSelect.selectedIndex]?.dataset?.nome || '';
+    const pecaIdx = document.getElementById('req-peca-select').value;
+    const cliente = document.getElementById('req-cliente').value;
+    const maquina = document.getElementById('req-maquina').value;
+
+    if (!numero_requisicao || !mala || !valor_peca) {
+      return alert('Preencha os campos obrigatórios (Número, Mala e Valor).');
+    }
+
+    const pedido = window.pedidosKanban.find(p => p.id == solicitacao_id);
+    let itens = [];
+    if (pecaIdx === 'TODAS') {
+      itens = pedido.itens;
+    } else {
+      itens = [pedido.itens[Number(pecaIdx)]];
+    }
+
+    // mapear quantidade
+    itens = itens.map(i => ({
+      ...i,
+      quantidade: i.quantidade_solicitada || 1
+    }));
+
+    fetch('/api/requisicoes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        solicitacao_id, numero_requisicao, valor_peca, mala, tecnico_nome, cliente, maquina, itens
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById('modal-requisicao').style.display = 'none';
+        fetchPedidos();
+      } else {
+        alert('Erro ao salvar: ' + data.error);
+      }
+    });
+  };
+
 });

@@ -31,6 +31,7 @@ async function initDatabase() {
   migrarSchemaNotaFiscal();
   migrarSchemaImportacao();
   migrarSchemaAgenda();
+  migrarSchemaRequisicoes();
   migrarJsonSeNecessario();
   inicializarJigsETecnicos();
   saveDb();
@@ -126,7 +127,8 @@ function criarTabelas() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nome TEXT NOT NULL,
       telefone TEXT,
-      email TEXT
+      email TEXT,
+      mala TEXT
     );
 
     CREATE TABLE IF NOT EXISTS backoffice (
@@ -145,6 +147,25 @@ function criarTabelas() {
       acao TEXT NOT NULL,
       data_hora TEXT NOT NULL,
       FOREIGN KEY (jig_id) REFERENCES jigs(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS requisicoes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      solicitacao_id INTEGER,
+      numero_requisicao TEXT NOT NULL,
+      codigo_peca TEXT,
+      descricao_peca TEXT,
+      quantidade INTEGER NOT NULL DEFAULT 1,
+      mala TEXT,
+      tecnico_nome TEXT,
+      cliente TEXT,
+      maquina TEXT,
+      valor_peca REAL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'PENDENTE',
+      criada_em TEXT NOT NULL,
+      nota_fiscal TEXT,
+      numero_retorno TEXT,
+      FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes(id)
     );
   `);
 }
@@ -267,6 +288,18 @@ function migrarSchemaAgenda() {
       criado_em TEXT NOT NULL
     );
   `);
+}
+
+function migrarSchemaRequisicoes() {
+  const colunasTecnicos = listarColunas('tecnicos');
+  if (colunasTecnicos.length > 0 && !colunasTecnicos.includes('mala')) {
+    db.run('ALTER TABLE tecnicos ADD COLUMN mala TEXT');
+  }
+
+  const colunasSolicitacoes = listarColunas('solicitacoes');
+  if (colunasSolicitacoes.length > 0 && !colunasSolicitacoes.includes('tag_requisicao')) {
+    db.run('ALTER TABLE solicitacoes ADD COLUMN tag_requisicao TEXT');
+  }
 }
 
 function getScalar(sql, params = []) {
@@ -429,12 +462,13 @@ function inicializarJigsETecnicos() {
         dados.forEach(row => {
           if (row['NOME']) {
             run(`
-              INSERT INTO tecnicos (nome, telefone, email)
-              VALUES (?, ?, ?)
+              INSERT INTO tecnicos (nome, telefone, email, mala)
+              VALUES (?, ?, ?, ?)
             `, [
               String(row['NOME']).trim(),
               row['TELEFONE'] ? String(row['TELEFONE']).trim() : null,
-              row['EMAIL'] ? String(row['EMAIL']).trim() : null
+              row['EMAIL'] ? String(row['EMAIL']).trim() : null,
+              row['MALA'] ? String(row['MALA']).trim() : null
             ]);
           }
         });

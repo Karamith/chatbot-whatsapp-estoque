@@ -45,6 +45,7 @@
       <div class="bo-nav-group" style="margin-right: 32px;">
         <button class="bo-nav-btn" id="btn-menu-3" onclick="window.location.href='agenda.html'"><img src="/bo-assets/Agenda.png" alt="Agenda" class="nav-icon-img"> Agenda</button>
         <button class="bo-nav-btn" id="btn-menu-4" onclick="window.location.href='importacoes.html'"><span class="nav-icon">✈️</span> Importar</button>
+        <button class="bo-nav-btn" id="btn-menu-req" onclick="window.location.href='requisicoes.html'"><span class="nav-icon">📦</span> Requisições</button>
         <button class="bo-nav-btn" id="btn-upload-estoque"><span class="nav-icon">⬆️</span> Estoque</button>
         <input type="file" id="file-upload-estoque" accept=".xlsx" style="display: none;">
       </div>
@@ -241,8 +242,49 @@
     <div class="calc-body" style="padding: 0; overflow: hidden;">
       <iframe src="/clientes-sandbox.html" style="width:100%; height:100%; border:none;"></iframe>
     </div>
-  </div>
+  </main>
 
+  <!-- Modal Requisição -->
+  <div id="modal-requisicao" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="modal-content" style="background: #1F2128; border: 1px solid #374151; border-radius: 8px; width: 500px; padding: 24px; color: white;">
+      <h2 style="margin-top: 0; color: #8B5CF6;">Nova Requisição</h2>
+      <input type="hidden" id="req-solicitacao-id">
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 0.8rem; color: #8E929B; margin-bottom: 4px;">Número da Requisição</label>
+        <input type="text" id="req-numero" style="width: 100%; padding: 8px; background: #13141A; border: 1px solid #374151; color: white; border-radius: 4px;" required>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 0.8rem; color: #8E929B; margin-bottom: 4px;">Peça(s) a Requisitar</label>
+        <select id="req-peca-select" style="width: 100%; padding: 8px; background: #13141A; border: 1px solid #374151; color: white; border-radius: 4px;">
+          <!-- options dynamically populated -->
+        </select>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="display: block; font-size: 0.8rem; color: #8E929B; margin-bottom: 4px;">Técnico / Mala</label>
+        <select id="req-mala-select" style="width: 100%; padding: 8px; background: #13141A; border: 1px solid #374151; color: white; border-radius: 4px;">
+          <option value="">Selecione...</option>
+        </select>
+      </div>
+      <div style="margin-bottom: 12px; display: flex; gap: 12px;">
+        <div style="flex: 1;">
+          <label style="display: block; font-size: 0.8rem; color: #8E929B; margin-bottom: 4px;">Cliente</label>
+          <input type="text" id="req-cliente" style="width: 100%; padding: 8px; background: #13141A; border: 1px solid #374151; color: #aaa; border-radius: 4px;" readonly>
+        </div>
+        <div style="flex: 1;">
+          <label style="display: block; font-size: 0.8rem; color: #8E929B; margin-bottom: 4px;">Máquina</label>
+          <input type="text" id="req-maquina" style="width: 100%; padding: 8px; background: #13141A; border: 1px solid #374151; color: #aaa; border-radius: 4px;" readonly>
+        </div>
+      </div>
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; font-size: 0.8rem; color: #8E929B; margin-bottom: 4px;">Valor da Peça (R$)</label>
+        <input type="number" step="0.01" id="req-valor" style="width: 100%; padding: 8px; background: #13141A; border: 1px solid #374151; color: white; border-radius: 4px;" required>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button onclick="document.getElementById('modal-requisicao').style.display='none'" style="padding: 8px 16px; background: transparent; border: 1px solid #374151; color: white; border-radius: 4px; cursor: pointer;">Cancelar</button>
+        <button onclick="window.salvarRequisicao()" style="padding: 8px 16px; background: #8B5CF6; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold;">Salvar Requisição</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // Saudação dinâmica baseada no JWT do usuário logado
