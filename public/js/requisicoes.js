@@ -40,8 +40,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateGauge(valorAtual) {
     const meta = 50000;
-    const porcentagem = Math.min((valorAtual / meta) * 100, 100).toFixed(1);
     
+    let corBarra = '#10B981'; // verde até 50k
+    if (valorAtual > 50000 && valorAtual <= 70000) {
+      corBarra = '#F59E0B'; // amarelo
+    } else if (valorAtual > 70000) {
+      // transição para vermelho (max em 100k para referência)
+      const excesso = Math.min(valorAtual - 70000, 30000);
+      const p = excesso / 30000;
+      const r = Math.round(245 + (239 - 245) * p);
+      const g = Math.round(158 + (68 - 158) * p);
+      const b = Math.round(11 + (68 - 11) * p);
+      corBarra = `rgb(${r}, ${g}, ${b})`;
+    }
+
     const option = {
       series: [
         {
@@ -52,8 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
           max: meta,
           splitNumber: 5,
           itemStyle: {
-            color: '#8B5CF6',
-            shadowColor: 'rgba(0,138,255,0.45)',
+            color: corBarra,
+            shadowColor: 'rgba(0,0,0,0.2)',
             shadowBlur: 10,
             shadowOffsetX: 2,
             shadowOffsetY: 2
@@ -74,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
           title: { show: false },
           detail: {
             valueAnimation: true,
-            offsetCenter: [0, '0%'],
+            offsetCenter: [0, '25%'],
             fontSize: 16,
             fontWeight: 'bold',
             color: 'inherit',
