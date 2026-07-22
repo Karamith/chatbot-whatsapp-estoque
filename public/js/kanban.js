@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ${pedido.itens && pedido.itens.some(i => i.descricao_peca && i.descricao_peca.includes('[! Importar]')) ? '<span class="bo-role-badge" style="border-color: #F59E0B; color: #F59E0B; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">⚠️ IMPORTAR</span>' : ''}
           ${isMD ? '<span class="bo-role-badge" style="border-color: #EF4444; color: #EF4444; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">MD</span>' : ''}
           ${pedido.tag_requisicao ? `<span class="bo-role-badge" style="border-color: #8B5CF6; color: #8B5CF6; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">${pedido.tag_requisicao}</span>` : ''}
-          <span class="bo-role-badge" style="border-color: ${statusColor}; color: ${statusColor}; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">${pedido.status_pedido.replace('_', ' ')}</span>
+          <span class="bo-role-badge" style="border-color: ${statusColor}; color: ${statusColor}; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">${pedido.status_pedido === 'EM_PROCESSAMENTO' ? 'EM PROCESS.' : pedido.status_pedido.replace('_', ' ')}</span>
           <div style="position: relative; display: inline-block;">
             <span class="btn-dots" style="color: var(--text-secondary); cursor: pointer; margin-left: 2px; padding: 0 6px;">⋮</span>
             <div class="dropdown-reprovado" style="display: none; position: absolute; right: 0; top: 100%; background: #2A2D35; border: 1px solid #374151; border-radius: 4px; padding: 4px; z-index: 10; box-shadow: 0 4px 6px rgba(0,0,0,0.3); min-width: 100px;">
