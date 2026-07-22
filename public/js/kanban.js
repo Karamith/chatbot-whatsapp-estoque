@@ -463,14 +463,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   window.abrirModalRequisicao = function(id) {
-    const pedido = window.pedidosKanban.find(p => p.id === id);
-    if (!pedido) return alert('Pedido não encontrado');
+    try {
+      const pedido = window.pedidosKanban.find(p => p.id === id);
+      if (!pedido) return alert('Pedido não encontrado');
 
-    document.getElementById('req-solicitacao-id').value = pedido.id;
-    document.getElementById('req-numero').value = '';
-    document.getElementById('req-valor').value = '';
-    document.getElementById('req-cliente').value = pedido.cliente || '';
-    document.getElementById('req-maquina').value = pedido.modelo || '';
+      if (!document.getElementById('req-solicitacao-id')) {
+        alert('O seu navegador está utilizando uma versão antiga da página (cache). Por favor, pressione Ctrl + F5 ou limpe o cache para recarregar a interface atualizada.');
+        return;
+      }
+
+      document.getElementById('req-solicitacao-id').value = pedido.id;
+      document.getElementById('req-numero').value = '';
+      document.getElementById('req-valor').value = '';
+      document.getElementById('req-cliente').value = pedido.cliente || '';
+      document.getElementById('req-maquina').value = pedido.modelo || '';
 
     const pecaSelect = document.getElementById('req-peca-select');
     pecaSelect.innerHTML = '';
@@ -494,6 +500,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
     document.getElementById('modal-requisicao').style.display = 'flex';
+    } catch (e) {
+      alert('Erro inesperado ao abrir a janela: ' + e.message);
+      console.error(e);
+    }
   };
 
   window.salvarRequisicao = function() {

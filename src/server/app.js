@@ -44,7 +44,11 @@ const upload = multer({ storage: storage });
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../../public')));
+app.use(express.static(path.join(__dirname, '../../public'), {
+  setHeaders: (res, path, stat) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  }
+}));
 // Rota estática para servir avatares e logo do Backoffice
 app.use('/bo-assets', express.static(path.join(__dirname, '../../data/backoffice'))); // Servir arquivos estáticos do Dashboard
 app.use('/avatares', express.static(path.join(__dirname, '../../data/avatares'))); // Servir fotos dos técnicos
