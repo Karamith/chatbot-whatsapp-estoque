@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
           title: { show: false },
           detail: {
             valueAnimation: true,
-            offsetCenter: [0, '25%'],
+            offsetCenter: [0, '45%'],
             fontSize: 16,
             fontWeight: 'bold',
             color: 'inherit',

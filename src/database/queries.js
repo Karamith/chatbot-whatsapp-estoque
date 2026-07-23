@@ -524,6 +524,19 @@ function obterTecnicosMalas() {
 
 function criarRequisicao(dados) {
   const { solicitacao_id, numero_requisicao, itens, mala, tecnico_nome, cliente, maquina, valor_peca } = dados;
+  
+  // Regra 1: Um número de requisição não pode ser usado em pedidos diferentes.
+  const checkReq = queryOne('SELECT solicitacao_id FROM requisicoes WHERE numero_requisicao = ? LIMIT 1', [numero_requisicao]);
+  if (checkReq && String(checkReq.solicitacao_id) !== String(solicitacao_id)) {
+    throw new Error('Este número de requisição já está sendo utilizado no Pedido #' + checkReq.solicitacao_id + '.');
+  }
+
+  // Regra 2: Cada pedido pode ter apenas UM número de requisição.
+  const checkSol = queryOne('SELECT numero_requisicao FROM requisicoes WHERE solicitacao_id = ? LIMIT 1', [solicitacao_id]);
+  if (checkSol && String(checkSol.numero_requisicao) !== String(numero_requisicao)) {
+    throw new Error('Este pedido já possui uma requisição associada (' + checkSol.numero_requisicao + '). Não é permitido usar múltiplos números de requisição para o mesmo pedido.');
+  }
+
   const db = getDb();
   
   try {
