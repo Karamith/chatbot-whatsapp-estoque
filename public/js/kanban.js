@@ -99,13 +99,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let mdFooter = '';
     let mdIndicator = '';
+    
     if (isMD) {
-      mdIndicator = `<div class="bo-card-indicator" style="height: 8px; background: repeating-linear-gradient(45deg, #8B0000, #8B0000 10px, #FF0000 10px, #FF0000 20px);"></div>`;
-      mdFooter = `
-        <div style="background: linear-gradient(90deg, #5c0000, #ff0000); color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 0.8rem; margin: 16px -16px -16px -16px; border-radius: 0 0 12px 12px;">
+      mdIndicator += `<div class="bo-card-indicator" style="height: 8px; background: repeating-linear-gradient(45deg, #8B0000, #8B0000 10px, #FF0000 10px, #FF0000 20px);"></div>`;
+      mdFooter += `
+        <div style="background: linear-gradient(90deg, #5c0000, #ff0000); color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 0.8rem; margin-top: 16px; margin-left: -16px; margin-right: -16px;">
           ⚠️ MACHINE DOWN | PRIORIDADE MÁXIMA
         </div>
       `;
+    }
+
+    if (pedido.is_parcial === 1) {
+      mdIndicator += `<div class="bo-card-indicator" style="height: 8px; background: repeating-linear-gradient(45deg, #b45309, #b45309 10px, #f59e0b 10px, #f59e0b 20px);"></div>`;
+      mdFooter += `
+        <div style="background: linear-gradient(90deg, #78350f, #d97706); color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 0.8rem; margin-top: 16px; margin-left: -16px; margin-right: -16px;">
+          ⚠️ PARCIAL | IMPORTAÇÃO
+        </div>
+      `;
+    }
+
+    // Fix bottom margin and radius for the last footer element if any
+    if (mdFooter) {
+      mdFooter = `<div style="overflow: hidden; border-radius: 0 0 12px 12px; margin: 0 -16px -16px -16px;">
+        <div style="margin: -16px 16px 0 16px;">
+          ${mdFooter.replace(/margin-top: 16px; margin-left: -16px; margin-right: -16px;/g, 'margin-top: 0; margin-left: -16px; margin-right: -16px;')}
+        </div>
+      </div>`;
     }
 
     const isImportacao = pedido.is_importacao === 1 || (pedido.itens && pedido.itens.some(i => i.descricao_peca && i.descricao_peca.includes('[! Importar]')));

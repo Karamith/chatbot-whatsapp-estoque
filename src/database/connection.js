@@ -31,6 +31,7 @@ async function initDatabase() {
   migrarSchemaNotaFiscal();
   migrarSchemaImportacao();
   migrarSchemaImportacaoSplit();
+  migrarSchemaParcial();
   migrarSchemaAgenda();
   migrarSchemaRequisicoes();
   migrarJsonSeNecessario();
@@ -291,6 +292,13 @@ function migrarSchemaImportacaoSplit() {
     if (!colunas.includes('eta')) {
       db.run('ALTER TABLE solicitacoes ADD COLUMN eta TEXT');
     }
+  }
+}
+
+function migrarSchemaParcial() {
+  const colunas = listarColunas('solicitacoes');
+  if (colunas.length > 0 && !colunas.includes('is_parcial')) {
+    db.run('ALTER TABLE solicitacoes ADD COLUMN is_parcial INTEGER DEFAULT 0');
   }
 }
 

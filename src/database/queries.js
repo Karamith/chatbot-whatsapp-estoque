@@ -583,29 +583,44 @@ function separarPedidoImportacao(id, itensSelecionadosIds) {
     const solicitacaoOriginal = queryOne('SELECT * FROM solicitacoes WHERE id = ?', [id]);
     if (!solicitacaoOriginal) throw new Error('Pedido não encontrado.');
 
-    runNoSave(`
-      INSERT INTO solicitacoes (
-        sessao_id, tecnico_nome, cliente, modelo, status_envio, criada_em,
-        telefone_tecnico, status_pedido, motivo, md, urgencia, responsavel_baixa,
-        parent_id, is_importacao
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      solicitacaoOriginal.sessao_id, solicitacaoOriginal.tecnico_nome, solicitacaoOriginal.cliente,
-      solicitacaoOriginal.modelo, solicitacaoOriginal.status_envio, new Date().toISOString(),
-      solicitacaoOriginal.telefone_tecnico, 'IMPORTACAO', solicitacaoOriginal.motivo,
-      solicitacaoOriginal.md, solicitacaoOriginal.urgencia, solicitacaoOriginal.responsavel_baixa,
-      solicitacaoOriginal.id, 1
-    ]);
+    // Verifica o total de itens para saber se é importação total ou parcial
+    const totalItens = queryAll('SELECT id FROM solicitacao_itens WHERE solicitacao_id = ?', [id]);
 
-    const novoId = getLastInsertId();
+    if (totalItens.length === itensSelecionadosIds.length) {
+      // Importação Total: Transforma o próprio pedido em importação
+      runNoSave(`UPDATE solicitacoes SET status_pedido = 'IMPORTACAO', is_importacao = 1 WHERE id = ?`, [id]);
+      
+      db.run('COMMIT');
+      saveDb();
+      return id;
+    } else {
+      // Importação Parcial: Cria pedido filho de importação e marca o original como parcial
+      runNoSave(`
+        INSERT INTO solicitacoes (
+          sessao_id, tecnico_nome, cliente, modelo, status_envio, criada_em,
+          telefone_tecnico, status_pedido, motivo, md, urgencia, responsavel_baixa,
+          parent_id, is_importacao
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        solicitacaoOriginal.sessao_id, solicitacaoOriginal.tecnico_nome, solicitacaoOriginal.cliente,
+        solicitacaoOriginal.modelo, solicitacaoOriginal.status_envio, new Date().toISOString(),
+        solicitacaoOriginal.telefone_tecnico, 'IMPORTACAO', solicitacaoOriginal.motivo,
+        solicitacaoOriginal.md, solicitacaoOriginal.urgencia, solicitacaoOriginal.responsavel_baixa,
+        solicitacaoOriginal.id, 1
+      ]);
 
-    for (const itemId of itensSelecionadosIds) {
-      runNoSave(`UPDATE solicitacao_itens SET solicitacao_id = ? WHERE id = ?`, [novoId, itemId]);
+      const novoId = getLastInsertId();
+
+      for (const itemId of itensSelecionadosIds) {
+        runNoSave(`UPDATE solicitacao_itens SET solicitacao_id = ? WHERE id = ?`, [novoId, itemId]);
+      }
+      
+      runNoSave(`UPDATE solicitacoes SET is_parcial = 1 WHERE id = ?`, [id]);
+
+      db.run('COMMIT');
+      saveDb();
+      return novoId;
     }
-
-    db.run('COMMIT');
-    saveDb();
-    return novoId;
   } catch (error) {
     try { db.run('ROLLBACK'); } catch (_) {}
     throw error;
