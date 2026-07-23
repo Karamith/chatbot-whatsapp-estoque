@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`;
     }
 
-    const isImportacao = pedido.is_importacao === 1 || (pedido.itens && pedido.itens.some(i => i.descricao_peca && i.descricao_peca.includes('[! Importar]')));
+    const isImportacao = pedido.is_importacao === 1 || (pedido.itens && pedido.itens.some(i => i.importacao === 1 || (i.descricao_peca && i.descricao_peca.includes('[! Importar]'))));
     const tipoEntregaIcon = isImportacao 
       ? '<img src="/icons/importacao.svg" alt="Importação" title="Importação" style="width: 28px; height: 28px;">'
       : '<img src="/icons/pronta_entrega.svg" alt="Pronta Entrega" title="Pronta Entrega" style="width: 28px; height: 28px;">';
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="bo-value large" style="font-size: 1rem;">${displayId}</span>
         </div>
         <div style="display: flex; align-items: center; gap: 4px; flex-wrap: nowrap;">
-          ${pedido.itens && pedido.itens.some(i => i.descricao_peca && i.descricao_peca.includes('[! Importar]')) ? '<span class="bo-role-badge" style="border-color: #F59E0B; color: #F59E0B; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">⚠️ IMPORTAR</span>' : ''}
+          ${isImportacao ? '<span class="bo-role-badge" style="border-color: #F59E0B; color: #F59E0B; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">⚠️ IMPORTAR</span>' : ''}
           ${isMD ? '<span class="bo-role-badge" style="border-color: #EF4444; color: #EF4444; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">MD</span>' : ''}
           ${pedido.tag_requisicao ? `<span class="bo-role-badge" style="border-color: #8B5CF6; color: #8B5CF6; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">${pedido.tag_requisicao}</span>` : ''}
           <span class="bo-role-badge" style="border-color: ${statusColor}; color: ${statusColor}; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">${pedido.status_pedido === 'EM_PROCESSAMENTO' ? 'EM PROCESS.' : pedido.status_pedido.replace('_', ' ')}</span>
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (pedido.itens && pedido.itens.length > 0) {
       pedido.itens.forEach(i => {
-        const isImportar = i.descricao_peca && i.descricao_peca.includes('[! Importar]');
+        const isImportar = i.importacao === 1 || (i.descricao_peca && i.descricao_peca.includes('[! Importar]'));
         container.innerHTML += `
           <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem;">
             <input type="checkbox" name="import-peca" value="${i.id}" ${isImportar ? 'checked' : ''} style="width: 16px; height: 16px; accent-color: #F59E0B;">

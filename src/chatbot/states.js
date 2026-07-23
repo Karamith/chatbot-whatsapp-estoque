@@ -383,12 +383,15 @@ async function handlePerguntaUrgencia(sessao, texto, client, telefone) {
     let resumoTexto = '';
     sessao.itens_consultados.forEach(i => {
       if (i.quantidadeDesejada > 0) {
+        i.importacao = true;
         const isImport = i.importacao ? '[! Importar] ' : '';
         const isRedundante = i.alerta_redundancia ? `[ALERTA: Solicitada há menos de 15 dias por ${i.alerta_redundancia}] ` : '';
         const isEdicula = i.isEdicula ? `[EDÍCULA - Loc: ${i.localizacao || 'N/A'}] ` : '';
         resumoTexto += `- ${isImport}${isRedundante}${isEdicula}${i.codigo} | ${i.descricao} | Quantidade: ${i.quantidadeDesejada}\n`;
       }
     });
+
+    queries.atualizarItensSessao(sessao.id, sessao.itens_consultados);
 
     const preview = MSG.REQUEST_SUMMARY(sessao.tecnico_nome, sessao.cliente, sessao.modelo, resumoTexto, sessao.motivo, sessao.md, sessao.urgencia);
     

@@ -210,8 +210,8 @@ function registrarSolicitacao(dados) {
     runNoSave(`
       INSERT INTO solicitacoes (
         sessao_id, tecnico_nome, cliente, modelo, status_envio, criada_em,
-        telefone_tecnico, status_pedido, motivo, md, urgencia
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        telefone_tecnico, status_pedido, motivo, md, urgencia, is_importacao
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       dados.sessao_id,
       dados.tecnico_nome,
@@ -223,7 +223,8 @@ function registrarSolicitacao(dados) {
       'PENDENTE',
       dados.motivo || null,
       dados.md || null,
-      dados.urgencia || null
+      dados.urgencia || null,
+      dados.urgencia === 'UTK' ? 1 : 0
     ]);
 
     solicitacaoId = getLastInsertId();
@@ -299,7 +300,8 @@ function buscarPedidos() {
              'id', i.id,
              'codigo_peca', i.codigo_peca,
              'descricao_peca', i.descricao_peca,
-             'quantidade', i.quantidade_solicitada
+             'quantidade', i.quantidade_solicitada,
+             'importacao', i.importacao
            )) as itens
     FROM solicitacoes s
     LEFT JOIN solicitacao_itens i ON s.id = i.solicitacao_id
