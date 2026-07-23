@@ -310,7 +310,7 @@ function buscarPedidos() {
   const pedidos = [];
   while(stmt.step()) {
     const row = stmt.getAsObject();
-    row.itens = parseJsonArray(row.itens);
+    row.itens = parseJsonArray(row.itens).filter(i => i.id !== null);
     pedidos.push(row);
   }
   stmt.free();
@@ -584,9 +584,13 @@ function separarPedidoImportacao(id, itensSelecionadosIds) {
     if (!solicitacaoOriginal) throw new Error('Pedido não encontrado.');
 
     // Verifica o total de itens para saber se é importação total ou parcial
-    const totalItens = queryAll('SELECT id FROM solicitacao_itens WHERE solicitacao_id = ?', [id]);
+    const stmtTotal = db.prepare('SELECT COUNT(*) as count FROM solicitacao_itens WHERE solicitacao_id = ?');
+    stmtTotal.bind([id]);
+    stmtTotal.step();
+    const totalItens = stmtTotal.getAsObject().count;
+    stmtTotal.free();
 
-    if (totalItens.length === itensSelecionadosIds.length) {
+    if (totalItens === itensSelecionadosIds.length) {
       // Importação Total: Transforma o próprio pedido em importação
       runNoSave(`UPDATE solicitacoes SET status_pedido = 'IMPORTACAO', is_importacao = 1 WHERE id = ?`, [id]);
       
