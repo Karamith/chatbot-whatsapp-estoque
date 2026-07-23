@@ -130,7 +130,7 @@ function renderData(data) {
   animateValue("val-total-hoje", data.totalHoje);
   animateValue("val-total-fila", data.totalFila);
   animateValue("val-total-md", data.totalMD);
-  animateValue("val-total-pecas", data.totalPecas);
+  if(data.totalImportacoes !== undefined) animateValue("val-total-importacao", data.totalImportacoes);
   animateValue("val-jigs", data.jigsEmprestados);
 
   // Status Kanban (Segunda Fileira) e Tooltips
@@ -292,6 +292,24 @@ function renderData(data) {
 
   // Renderizar Tabela de JIGs
   renderJigsTable(data.listaJigs);
+
+  const tbodyImportacoes = document.getElementById("tbody-importacoes");
+  if (tbodyImportacoes && data.listaImportacoes) {
+    if (data.listaImportacoes.length === 0) {
+      tbodyImportacoes.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 24px; color: #9CA3AF;">Nenhuma peça em processo de importação no momento.</td></tr>`;
+    } else {
+      tbodyImportacoes.innerHTML = data.listaImportacoes.map(item => `
+        <tr style="border-bottom: 1px solid var(--border-color);">
+          <td style="padding: 12px 16px;"><span class="status-badge" style="background: rgba(245, 158, 11, 0.2); color: #F59E0B; border: 1px solid #F59E0B;">#PDI-${item.pedido_id}</span></td>
+          <td style="padding: 12px 16px; font-weight: 600;">${item.codigo_peca}</td>
+          <td style="padding: 12px 16px;">${item.descricao_peca}</td>
+          <td style="padding: 12px 16px; color: var(--accent-color); font-weight: bold;">${item.quantidade_solicitada}</td>
+          <td style="padding: 12px 16px;">${item.tecnico_nome}</td>
+          <td style="padding: 12px 16px;">${item.eta || '-'}</td>
+        </tr>
+      `).join('');
+    }
+  }
 }
 
 function renderJigsTable(jigs) {

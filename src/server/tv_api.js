@@ -42,13 +42,14 @@ function setupApi(app) {
       // 4.1. Pedidos em MD na Fila
       const totalMD = getScalar("SELECT COUNT(*) as total FROM solicitacoes WHERE status_pedido != 'FINALIZADO' AND (md = 'Sim' OR md = '1' OR em_md = 'sim')");
 
-      // 5. Volume de Pecas Solicitadas (Ultimos 30 dias)
-      const totalPecas = getScalar(`
+      // 5. Volume de Importações
+      const totalImportacoes = getScalar(`
         SELECT SUM(si.quantidade_solicitada) as total 
         FROM solicitacao_itens si 
         JOIN solicitacoes s ON si.solicitacao_id = s.id 
-        WHERE s.criada_em >= date('now', '-30 days')
-      `);
+        WHERE (si.importacao = 1 OR s.is_importacao = 1)
+          AND s.status_pedido NOT IN ('FINALIZADO', 'CANCELADO', 'REPROVADO')
+      `) || 0;
 
       // 4. Ranking Top Peças
       const stmtPecas = db.prepare(`
@@ -144,6 +145,25 @@ function setupApi(app) {
       }
       stmtPecasPendentes.free();
 
+      // Lista de Importações
+      const stmtImports = db.prepare(`
+        SELECT 
+          si.codigo_peca, 
+          si.descricao_peca, 
+          si.quantidade_solicitada, 
+          s.tecnico_nome, 
+          s.eta,
+          s.id as pedido_id
+        FROM solicitacao_itens si
+        JOIN solicitacoes s ON si.solicitacao_id = s.id
+        WHERE (si.importacao = 1 OR s.is_importacao = 1)
+          AND s.status_pedido NOT IN ('FINALIZADO', 'CANCELADO', 'REPROVADO')
+        ORDER BY s.criada_em DESC
+      `);
+      const listaImportacoes = [];
+      while(stmtImports.step()) listaImportacoes.push(stmtImports.getAsObject());
+      stmtImports.free();
+
       const stmtTodos = db.prepare(`SELECT id, cliente, tecnico_nome, modelo AS equipamento, status_pedido, numero_orcamento, numero_pedido_protheus, nota_fiscal FROM solicitacoes ORDER BY id DESC`);
       const pedidosPorStatus = {
         'PENDENTE': [],
@@ -190,13 +210,14 @@ function setupApi(app) {
           totalHoje,
           totalFila,
           totalMD,
-          totalPecas,
+          totalImportacoes,
           totalBaixadosHoje,
           topPecas,
           topEquipamentos,
           topClientes,
           jigsEmprestados,
           listaJigs,
+          listaImportacoes,
           mdTickerData,
           pedidosPendentesList,
           pecasDiagnostico: pecasDiagnosticoFormatado,

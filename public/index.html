@@ -31,6 +31,7 @@
           <button class="tab-btn" onclick="switchTab('jigs', event)"><i class="ph ph-wrench"></i> Controle de JIGs</button>
           <button class="tab-btn" onclick="switchTab('instalacoes', event)"><i class="ph ph-calendar-check"></i> Instalações</button>
           <button class="tab-btn" onclick="switchTab('reposicoes', event)"><i class="ph ph-package"></i> Reposições</button>
+          <button class="tab-btn" onclick="switchTab('importacoes', event)"><i class="ph ph-airplane-tilt"></i> Importações</button>
         </div>
       </div>
     </header>
@@ -93,13 +94,13 @@
           </div>
         </div>
 
-        <!-- Volume Peças -->
+        <!-- Peças em Importação -->
         <div class="card glass">
-          <div class="card-icon">⚙️</div>
+          <div class="card-icon">✈️</div>
           <div class="card-content">
-            <h3 class="card-title">Volume de Peças</h3>
-            <p class="card-value" id="val-total-pecas">0</p>
-            <span class="card-label">Últimos 30 Dias</span>
+            <h3 class="card-title">Peças em Importação</h3>
+            <p class="card-value" id="val-total-importacao">0</p>
+            <span class="card-label">Aguardando Chegada</span>
           </div>
         </div>
 
@@ -425,6 +426,31 @@
       </div>
     </div>
 
+    <!-- TAB: IMPORTAÇÕES -->
+    <div id="tab-importacoes" class="tab-pane">
+      <div class="card glass" style="margin-bottom: 24px; padding: 24px;">
+        <h2 style="font-size: 1.25rem; font-weight: 600; color: #fff; margin-bottom: 16px;">
+          Peças em Processo de Importação
+        </h2>
+        <div class="table-container" style="overflow-x: auto; background: var(--bg-card); border-radius: 8px;">
+          <table class="data-table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: var(--bg-panel); color: #9CA3AF; text-align: left; font-size: 0.75rem; text-transform: uppercase;">
+                <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">ID Pedido</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">Cód. Peça</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">Descrição</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">Qtd</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">Solicitante</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">ETA</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-importacoes" style="font-size: 0.85rem; color: #E2E8F0;">
+              <!-- Linhas geradas via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </main>
 
   <div id="toast-container" class="toast-container"></div>
