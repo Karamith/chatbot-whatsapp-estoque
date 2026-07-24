@@ -174,7 +174,7 @@ async function updateColumnHeaders() {
         badge.innerText = 'HOJE';
         badge.style.position = 'absolute';
         badge.style.right = '10px';
-        badge.style.top = isHoliday ? '36px' : '16px';
+        badge.style.top = '16px';
         badge.style.background = 'var(--color-green)';
         badge.style.color = 'var(--bg-dark)';
         badge.style.fontSize = '0.65rem';
