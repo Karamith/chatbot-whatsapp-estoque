@@ -33,13 +33,86 @@ function getStrDate(d) {
   return `${y}-${m}-${day}`;
 }
 
-function updateColumnHeaders() {
+let holidaysCache = {};
+
+const SP_FIXED_HOLIDAYS = [
+  { month: 1, day: 25, name: "Aniversário de São Paulo" },
+  { month: 7, day: 9, name: "Revolução Constitucionalista (SP)" }
+];
+
+async function getHolidays(year) {
+  if (holidaysCache[year]) return holidaysCache[year];
+  try {
+    const res = await fetch(`https://brasilapi.com.br/api/feriados/v1/${year}`);
+    if (res.ok) {
+      const data = await res.json();
+      
+      // Adicionar feriados fixos de SP
+      SP_FIXED_HOLIDAYS.forEach(h => {
+        const dateStr = `${year}-${String(h.month).padStart(2, '0')}-${String(h.day).padStart(2, '0')}`;
+        if (!data.find(f => f.date === dateStr)) {
+          data.push({ date: dateStr, name: h.name, type: "sp" });
+        }
+      });
+      
+      // Ordenar todos
+      data.sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      holidaysCache[year] = data;
+      return holidaysCache[year];
+    }
+  } catch (e) {
+    console.error("Erro ao buscar feriados:", e);
+  }
+  return [];
+}
+
+function updateNextHolidayWidget() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const currentYear = today.getFullYear();
+  let nextHoliday = null;
+  
+  if (holidaysCache[currentYear]) {
+    nextHoliday = holidaysCache[currentYear].find(f => new Date(f.date + 'T00:00:00') >= today);
+  }
+  
+  if (!nextHoliday && holidaysCache[currentYear + 1]) {
+    nextHoliday = holidaysCache[currentYear + 1][0];
+  }
+  
+  const widgets = document.querySelectorAll('.widget-info');
+  for (let w of widgets) {
+    const label = w.querySelector('.widget-label');
+    if (label && label.innerText.toLowerCase().includes('próximo feriado')) {
+      const val = w.querySelector('.widget-value');
+      if (nextHoliday && val) {
+        const d = new Date(nextHoliday.date + 'T00:00:00');
+        const dStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+        let shortName = nextHoliday.name;
+        if (shortName.length > 20) shortName = shortName.substring(0, 18) + '...';
+        val.innerText = `${dStr} - ${shortName}`;
+      }
+    }
+  }
+}
+
+async function updateColumnHeaders() {
   const dates = [];
   for (let i = 0; i < 7; i++) {
     const d = new Date(currentMonday);
     d.setDate(currentMonday.getDate() + i);
     dates.push(d);
   }
+
+  const years = [...new Set(dates.map(d => d.getFullYear()))];
+  for (const year of years) {
+    await getHolidays(year);
+  }
+  
+  // Also fetch current year to update the next holiday widget reliably
+  await getHolidays(new Date().getFullYear());
+  updateNextHolidayWidget();
 
   const columns = document.querySelectorAll('.day-column');
   const todayStr = getStrDate(new Date());
@@ -48,6 +121,7 @@ function updateColumnHeaders() {
     if (idx < 7) {
       const d = dates[idx];
       const strDate = getStrDate(d);
+      const year = d.getFullYear();
       col.setAttribute('data-full-date', strDate);
       
       const dayHeader = col.querySelector('.day-header');
@@ -63,8 +137,26 @@ function updateColumnHeaders() {
       col.style.background = '';
       h3.style.color = '';
       dayHeader.style.position = '';
-      const oldBadge = dayHeader.querySelector('.badge-hoje');
-      if (oldBadge) oldBadge.remove();
+      
+      const oldBadges = dayHeader.querySelectorAll('.badge-hoje, .badge-feriado');
+      oldBadges.forEach(b => b.remove());
+
+      // Checar se é feriado
+      const feriadosAno = holidaysCache[year] || [];
+      const isHoliday = feriadosAno.find(f => f.date === strDate);
+
+      if (isHoliday) {
+        col.classList.add('holiday-column');
+        dayHeader.style.position = 'relative';
+        
+        const badgeFeriado = document.createElement('span');
+        badgeFeriado.className = 'badge-feriado';
+        badgeFeriado.innerText = isHoliday.name;
+        badgeFeriado.title = isHoliday.name;
+        dayHeader.appendChild(badgeFeriado);
+      } else {
+        col.classList.remove('holiday-column');
+      }
 
       if (strDate === selectedDate) {
         col.classList.add('column-today');
@@ -82,7 +174,7 @@ function updateColumnHeaders() {
         badge.innerText = 'HOJE';
         badge.style.position = 'absolute';
         badge.style.right = '10px';
-        badge.style.top = '16px';
+        badge.style.top = isHoliday ? '36px' : '16px';
         badge.style.background = 'var(--color-green)';
         badge.style.color = 'var(--bg-dark)';
         badge.style.fontSize = '0.65rem';
@@ -280,8 +372,8 @@ function initSortable() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  updateColumnHeaders();
+document.addEventListener('DOMContentLoaded', async () => {
+  await updateColumnHeaders();
   fetchTecnicos().then(() => fetchAgenda());
   initSortable();
 
@@ -289,17 +381,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnNext = document.getElementById('btn-next-week');
 
   if (btnPrev) {
-    btnPrev.addEventListener('click', () => {
+    btnPrev.addEventListener('click', async () => {
       currentMonday.setDate(currentMonday.getDate() - 7);
-      updateColumnHeaders();
+      await updateColumnHeaders();
       fetchAgenda();
     });
   }
 
   if (btnNext) {
-    btnNext.addEventListener('click', () => {
+    btnNext.addEventListener('click', async () => {
       currentMonday.setDate(currentMonday.getDate() + 7);
-      updateColumnHeaders();
+      await updateColumnHeaders();
       fetchAgenda();
     });
   }
