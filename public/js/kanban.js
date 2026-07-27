@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="dropdown-reprovado" style="display: none; position: absolute; right: 0; top: 100%; background: #2A2D35; border: 1px solid #374151; border-radius: 4px; padding: 4px; z-index: 10; box-shadow: 0 4px 6px rgba(0,0,0,0.3); min-width: 100px;">
               <button onclick="window.importarPedido(${pedido.id})" style="background: #F59E0B; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; white-space: nowrap; width: 100%; margin-bottom: 4px;">Importação</button>
               <button onclick="window.abrirModalRequisicao(${pedido.id})" style="background: #8B5CF6; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; white-space: nowrap; width: 100%; margin-bottom: 4px;">Requisição</button>
-              <button onclick="window.reprovarPedido(${pedido.id})" style="background: #EF4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; white-space: nowrap; width: 100%;">Reprovado</button>
+              ${localStorage.getItem('bo_acesso') === 'MASTER' ? `<button onclick="window.reprovarPedido(${pedido.id})" style="background: #EF4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; white-space: nowrap; width: 100%;">Reprovado</button>` : ''}
             </div>
           </div>
         </div>

@@ -154,6 +154,7 @@
             passwordModal.style.display = 'flex';
           } else {
             localStorage.setItem('bo_token', data.token);
+            localStorage.setItem('bo_acesso', data.acesso);
             window.location.href = 'backoffice.html';
           }
         } else {
@@ -187,6 +188,7 @@
 
         if (res.ok) {
           localStorage.setItem('bo_token', data.token);
+          localStorage.setItem('bo_acesso', data.acesso);
           alert('Senha alterada com sucesso!');
           window.location.href = 'backoffice.html';
         } else {

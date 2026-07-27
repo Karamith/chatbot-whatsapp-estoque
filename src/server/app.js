@@ -178,6 +178,18 @@ app.delete('/api/agenda/:id', (req, res) => {
   }
 });
 
+function getAcessoBO(usuario) {
+  try {
+    const wb = xlsx.readFile(path.join(__dirname, '../../data/backoffice/backoffice.xlsx'));
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const data = xlsx.utils.sheet_to_json(sheet);
+    const userExcel = data.find(r => r.EMAIL && r.EMAIL.toLowerCase() === usuario.toLowerCase());
+    return userExcel && userExcel.ACESSO ? String(userExcel.ACESSO).toUpperCase() : 'OPERACIONAL';
+  } catch (e) {
+    return 'OPERACIONAL';
+  }
+}
+
 // POST /api/login
 app.post('/api/login', (req, res) => {
   const { usuario, senha } = req.body;
@@ -186,14 +198,16 @@ app.post('/api/login', (req, res) => {
     return res.status(400).json({ error: 'Usuário e senha são obrigatórios.' });
   }
 
+  const acesso = getAcessoBO(usuario);
+
   const userRecord = queries.buscarUsuarioBO(usuario);
   if (userRecord) {
     const senhaCorreta = bcrypt.compareSync(senha, userRecord.senha_hash);
     if (!senhaCorreta) {
       return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
-    const token = jwt.sign({ id: userRecord.id, usuario: userRecord.usuario }, JWT_SECRET, { expiresIn: '12h' });
-    return res.json({ token, usuario: userRecord.usuario });
+    const token = jwt.sign({ id: userRecord.id, usuario: userRecord.usuario, acesso }, JWT_SECRET, { expiresIn: '12h' });
+    return res.json({ token, usuario: userRecord.usuario, acesso });
   }
 
   // Se não tem no banco, tenta na planilha
@@ -226,8 +240,9 @@ app.post('/api/change-password', (req, res) => {
   queries.criarUsuarioBO(usuario, hash);
   const userRecord = queries.buscarUsuarioBO(usuario);
   
-  const token = jwt.sign({ id: userRecord.id, usuario: userRecord.usuario }, JWT_SECRET, { expiresIn: '12h' });
-  res.json({ token, usuario: userRecord.usuario });
+  const acesso = getAcessoBO(usuario);
+  const token = jwt.sign({ id: userRecord.id, usuario: userRecord.usuario, acesso }, JWT_SECRET, { expiresIn: '12h' });
+  res.json({ token, usuario: userRecord.usuario, acesso });
 });
 
 // GET /api/clientes-dashboard
@@ -446,6 +461,10 @@ app.put('/api/pedidos/:id/status', authenticateToken, async (req, res) => {
   const validStatus = ['PENDENTE', 'EM_ANALISE', 'ORCAMENTO_ENVIADO', 'APROVADO', 'EM_PROCESSAMENTO', 'FINALIZADO', 'REPROVADO', 'IMPORTACAO'];
   if (!status || !validStatus.includes(status)) {
     return res.status(400).json({ error: 'Status inválido.' });
+  }
+
+  if (status === 'REPROVADO' && req.user.acesso !== 'MASTER') {
+    return res.status(403).json({ error: 'Apenas usuários MASTER podem reprovar pedidos.' });
   }
 
   try {
