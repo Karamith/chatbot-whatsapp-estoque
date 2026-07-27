@@ -256,6 +256,12 @@ app.get('/api/clientes-dashboard', (req, res) => {
   }
 });
 
+// GET /api/me
+app.get('/api/me', authenticateToken, (req, res) => {
+  const acesso = getAcessoBO(req.user.usuario);
+  res.json({ usuario: req.user.usuario, acesso });
+});
+
 // POST /api/clientes-reload
 app.post('/api/clientes-reload', (req, res) => {
   try {
@@ -463,8 +469,11 @@ app.put('/api/pedidos/:id/status', authenticateToken, async (req, res) => {
     return res.status(400).json({ error: 'Status inválido.' });
   }
 
-  if (status === 'REPROVADO' && req.user.acesso !== 'MASTER') {
-    return res.status(403).json({ error: 'Apenas usuários MASTER podem reprovar pedidos.' });
+  if (status === 'REPROVADO') {
+    const acesso = req.user.acesso || getAcessoBO(req.user.usuario);
+    if (acesso !== 'MASTER') {
+      return res.status(403).json({ error: 'Apenas usuários MASTER podem reprovar pedidos.' });
+    }
   }
 
   try {

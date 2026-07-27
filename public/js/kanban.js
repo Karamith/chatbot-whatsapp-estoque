@@ -449,7 +449,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  fetchPedidos();
+  fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } })
+    .then(res => res.json())
+    .then(data => {
+      if (data.acesso) localStorage.setItem('bo_acesso', data.acesso);
+      fetchPedidos();
+    })
+    .catch(() => fetchPedidos());
   
   if (typeof io !== 'undefined') {
     const socket = io();
