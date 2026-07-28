@@ -131,9 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="icon" style="margin-right: 4px;">📋</span> 
           <span class="bo-value large" style="font-size: 1rem;">${displayId}</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 4px; flex-wrap: nowrap;">
+        <div style="display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: flex-end;">
           ${isImportacao ? '<span class="bo-role-badge" style="border-color: #F59E0B; color: #F59E0B; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">⚠️ IMPORTAR</span>' : ''}
-          ${isMD ? '<span class="bo-role-badge" style="border-color: #EF4444; color: #EF4444; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">MD</span>' : ''}
           ${pedido.tag_requisicao ? `<span class="bo-role-badge" style="border-color: #8B5CF6; color: #8B5CF6; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">${pedido.tag_requisicao}</span>` : ''}
           <span class="bo-role-badge" style="border-color: ${statusColor}; color: ${statusColor}; white-space: nowrap; padding: 2px 4px; font-size: 0.6rem;">${pedido.status_pedido === 'EM_PROCESSAMENTO' ? 'EM PROCESS.' : pedido.status_pedido.replace('_', ' ')}</span>
           <div style="position: relative; display: inline-block;">
