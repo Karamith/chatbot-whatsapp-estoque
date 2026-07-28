@@ -11,7 +11,7 @@ function createImapConfig() {
   return {
     user: config.IMAP_USER,
     password: config.IMAP_PASS,
-    host: 'imap.gmail.com',
+    host: 'outlook.office365.com',
     port: 993,
     tls: true,
     tlsOptions: { rejectUnauthorized: false }
