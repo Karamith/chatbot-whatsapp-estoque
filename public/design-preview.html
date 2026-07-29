@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Titanium Ops — Design Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-tokens.css">
+  <style>
+    /* ── Preview Shell ── */
+    body {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .preview-shell {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .preview-banner {
+      background: var(--accent-subtle);
+      border-bottom: 1px solid var(--accent-muted);
+      padding: var(--space-2) var(--space-5);
+      text-align: center;
+      font-size: var(--font-sm);
+      color: var(--accent-hover);
+      font-weight: var(--weight-medium);
+      letter-spacing: 0.3px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .preview-section {
+      padding: var(--space-6) var(--space-7);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .preview-section:last-child {
+      border-bottom: none;
+    }
+
+    .section-label {
+      font-size: var(--font-xs);
+      font-weight: var(--weight-semibold);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: var(--space-4);
+    }
+
+    .section-title {
+      font-size: var(--font-xl);
+      font-weight: var(--weight-bold);
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    .section-desc {
+      font-size: var(--font-base);
+      color: var(--text-secondary);
+      margin-bottom: var(--space-5);
+      max-width: 640px;
+      line-height: var(--leading-normal);
+    }
+
+    /* ── Utility Grids ── */
+    .row { display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: flex-start; }
+    .row-tight { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); }
+    .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-3); }
+
+    /* ── Color Swatches ── */
+    .swatch-group { display: flex; flex-direction: column; gap: var(--space-1); }
+    .swatch {
+      width: 100%;
+      height: 48px;
+      border-radius: var(--radius-base);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: flex-end;
+      padding: var(--space-1) var(--space-2);
+    }
+    .swatch-label {
+      font-size: var(--font-xs);
+      font-weight: var(--weight-medium);
+      color: var(--text-secondary);
+    }
+    .swatch-code {
+      font-size: 10px;
+      font-family: 'SF Mono', 'Cascadia Code', monospace;
+      color: var(--text-tertiary);
+    }
+
+    /* ══════════════════════════════════════════
+       COMPONENT PREVIEW STYLES
+       ══════════════════════════════════════════ */
+
+    /* ── Header ── */
+    .to-header {
+      height: var(--header-height);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-5);
+    }
+
+    .to-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .to-logo {
+      height: 28px;
+      opacity: 0.9;
+    }
+
+    .to-header-title {
+      font-size: var(--font-md);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+      letter-spacing: 0.3px;
+    }
+
+    .to-nav-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .to-nav-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      padding: var(--space-1) var(--space-3);
+      font-size: var(--font-sm);
+      font-weight: var(--weight-medium);
+      font-family: var(--font-family);
+      border-radius: var(--radius-base);
+      cursor: pointer;
+      transition: all var(--transition-base);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      white-space: nowrap;
+    }
+
+    .to-nav-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+    }
+
+    .to-nav-btn.active {
+      background: var(--accent-subtle);
+      color: var(--accent-hover);
+      border-color: var(--accent-muted);
+    }
+
+    .to-nav-btn.danger {
+      color: var(--status-danger);
+    }
+    .to-nav-btn.danger:hover {
+      background: var(--status-danger-subtle);
+      border-color: rgba(196, 61, 61, 0.2);
+    }
+
+    .to-nav-icon {
+      width: var(--icon-size);
+      height: var(--icon-size);
+      opacity: 0.7;
+    }
+
+    .to-header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .to-user-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .to-greeting {
+      font-size: var(--font-sm);
+      color: var(--text-secondary);
+      font-weight: var(--weight-regular);
+    }
+
+    .to-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      background: var(--border-default);
+      border: 1.5px solid var(--border-strong);
+    }
+
+    /* ── Timeline ── */
+    .to-timeline {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: 0 var(--space-5);
+    }
+
+    .to-time-label {
+      font-size: var(--font-xs);
+      font-weight: var(--weight-semibold);
+      color: var(--text-tertiary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .to-timeline-track {
+      flex: 1;
+      max-width: 320px;
+      height: 4px;
+      background: var(--bg-overlay);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .to-timeline-fill {
+      height: 100%;
+      width: 65%;
+      background: var(--accent);
+      border-radius: var(--radius-full);
+      transition: width 1s ease;
+    }
+
+    /* ── Kanban Column ── */
+    .to-column {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-base);
+      min-width: var(--column-min-width);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .to-column-header {
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .to-column-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .to-column-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+
+    .to-column-title {
+      font-size: var(--font-sm);
+      font-weight: var(--weight-semibold);
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .to-column-count {
+      font-size: var(--font-xs);
+      font-weight: var(--weight-medium);
+      color: var(--text-tertiary);
+      background: var(--bg-overlay);
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+    }
+
+    .to-column-body {
+      padding: var(--space-2);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    /* ── Card ── */
+    .to-card {
+      background: var(--bg-overlay);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-base);
+      padding: var(--space-3);
+      cursor: grab;
+      transition: background var(--transition-base), border-color var(--transition-base);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .to-card:hover {
+      background: var(--bg-elevated);
+      border-color: var(--border-default);
+    }
+
+    .to-card-indicator {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      border-radius: var(--radius-base) var(--radius-base) 0 0;
+    }
+
+    /* Card header row */
+    .to-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+    }
+
+    .to-card-id {
+      font-size: var(--font-base);
+      font-weight: var(--weight-bold);
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .to-card-tags {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    /* Badge */
+    .to-badge {
+      font-size: var(--font-xs);
+      font-weight: var(--weight-semibold);
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+      letter-spacing: 0.3px;
+      line-height: 1.5;
+    }
+
+    .to-badge-status {
+      background: var(--accent-subtle);
+      color: var(--accent-hover);
+    }
+
+    .to-badge-import {
+      background: var(--status-warning-subtle);
+      color: var(--status-warning);
+    }
+
+    .to-badge-req {
+      background: var(--status-purple-subtle);
+      color: var(--status-purple);
+    }
+
+    .to-badge-danger {
+      background: var(--status-danger-subtle);
+      color: var(--status-danger);
+    }
+
+    .to-badge-success {
+      background: var(--status-success-subtle);
+      color: var(--status-success);
+    }
+
+    .to-badge-info {
+      background: var(--status-info-subtle);
+      color: var(--status-info);
+    }
+
+    /* Dots menu */
+    .to-dots-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      padding: 0 var(--space-1);
+      font-size: var(--font-md);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+      line-height: 1;
+    }
+
+    .to-dots-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    /* Card info row */
+    .to-card-tech {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .to-card-tech-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .to-card-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: var(--border-default);
+      border: 1.5px solid var(--border-strong);
+      flex-shrink: 0;
+    }
+
+    .to-card-tech-name {
+      font-size: var(--font-sm);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+    }
+
+    .to-card-tech-label {
+      font-size: var(--font-xs);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .to-card-role {
+      font-size: var(--font-xs);
+      font-weight: var(--weight-semibold);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      border: 1px solid;
+    }
+
+    .to-role-fse { color: var(--status-info); border-color: rgba(91, 127, 196, 0.3); }
+    .to-role-rse { color: var(--status-danger); border-color: rgba(196, 61, 61, 0.3); }
+    .to-role-cc { color: var(--status-success); border-color: rgba(45, 155, 106, 0.3); }
+    .to-role-bo { color: var(--status-warning); border-color: rgba(196, 132, 29, 0.3); }
+
+    /* Card data grid */
+    .to-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-2);
+    }
+
+    .to-card-field {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .to-card-field-label {
+      font-size: var(--font-xs);
+      font-weight: var(--weight-medium);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .to-card-field-value {
+      font-size: var(--font-sm);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Card bottom row */
+    .to-card-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-2);
+      padding-top: var(--space-2);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .to-card-bottom .to-card-field:last-child {
+      text-align: right;
+    }
+
+    .to-card-bottom .to-card-field:nth-child(2) {
+      text-align: center;
+    }
+
+    .to-card-bottom .to-card-field:nth-child(2) .to-card-field-label {
+      justify-content: center;
+    }
+
+    .to-card-bottom .to-card-field:last-child .to-card-field-label {
+      justify-content: flex-end;
+    }
+
+    /* Card MD footer */
+    .to-card-md-footer {
+      background: var(--status-danger);
+      color: var(--text-primary);
+      text-align: center;
+      padding: var(--space-2) var(--space-3);
+      font-weight: var(--weight-semibold);
+      font-size: var(--font-xs);
+      letter-spacing: 0.5px;
+      margin: var(--space-1) calc(var(--space-3) * -1) calc(var(--space-3) * -1);
+      border-radius: 0 0 calc(var(--radius-base) - 1px) calc(var(--radius-base) - 1px);
+    }
+
+    /* Card MD state */
+    .to-card.card-md {
+      border-color: rgba(196, 61, 61, 0.3);
+    }
+
+    .to-card.card-md .to-card-indicator {
+      background: repeating-linear-gradient(
+        45deg,
+        var(--status-danger),
+        var(--status-danger) 8px,
+        #8B2020 8px,
+        #8B2020 16px
+      );
+    }
+
+    /* Card Parcial footer */
+    .to-card-parcial-footer {
+      background: var(--status-warning);
+      color: var(--text-inverse);
+      text-align: center;
+      padding: var(--space-2) var(--space-3);
+      font-weight: var(--weight-semibold);
+      font-size: var(--font-xs);
+      letter-spacing: 0.5px;
+      margin: var(--space-1) calc(var(--space-3) * -1) calc(var(--space-3) * -1);
+      border-radius: 0 0 calc(var(--radius-base) - 1px) calc(var(--radius-base) - 1px);
+    }
+
+    /* ── Buttons ── */
+    .to-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--font-sm);
+      font-weight: var(--weight-medium);
+      font-family: var(--font-family);
+      border-radius: var(--radius-base);
+      cursor: pointer;
+      transition: all var(--transition-base);
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .to-btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .to-btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .to-btn-secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border-color: var(--border-default);
+    }
+    .to-btn-secondary:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    .to-btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+    }
+    .to-btn-ghost:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .to-btn-success {
+      background: var(--status-success);
+      color: #fff;
+    }
+    .to-btn-success:hover {
+      filter: brightness(1.1);
+    }
+
+    .to-btn-warning {
+      background: var(--status-warning);
+      color: var(--text-inverse);
+    }
+    .to-btn-warning:hover {
+      filter: brightness(1.1);
+    }
+
+    .to-btn-danger {
+      background: transparent;
+      color: var(--status-danger);
+      border-color: rgba(196, 61, 61, 0.3);
+    }
+    .to-btn-danger:hover {
+      background: var(--status-danger-subtle);
+    }
+
+    .to-btn-sm {
+      padding: var(--space-1) var(--space-2);
+      font-size: var(--font-xs);
+    }
+
+    /* ── Form Controls ── */
+    .to-input {
+      background: var(--bg-base);
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-base);
+      font-family: var(--font-family);
+      font-size: var(--font-base);
+      outline: none;
+      transition: border-color var(--transition-base), box-shadow var(--transition-base);
+      width: 100%;
+    }
+
+    .to-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-subtle);
+    }
+
+    .to-input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .to-select {
+      appearance: none;
+      background: var(--bg-base) url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%237A8494' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+      padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3);
+      border-radius: var(--radius-base);
+      font-family: var(--font-family);
+      font-size: var(--font-base);
+      outline: none;
+      cursor: pointer;
+      transition: border-color var(--transition-base);
+    }
+
+    .to-select:focus {
+      border-color: var(--accent);
+    }
+
+    .to-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .to-form-label {
+      font-size: var(--font-sm);
+      font-weight: var(--weight-medium);
+      color: var(--text-secondary);
+    }
+
+    /* ── Table ── */
+    .to-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--font-sm);
+    }
+
+    .to-table th {
+      text-align: left;
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--font-xs);
+      font-weight: var(--weight-semibold);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-default);
+      background: var(--bg-base);
+    }
+
+    .to-table td {
+      padding: var(--space-3);
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+    }
+
+    .to-table tbody tr {
+      transition: background var(--transition-fast);
+    }
+
+    .to-table tbody tr:hover {
+      background: var(--bg-hover);
+    }
+
+    .to-table-text-muted {
+      color: var(--text-secondary);
+      font-size: var(--font-xs);
+    }
+
+    /* ── Metric Cards ── */
+    .to-metric {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-base);
+      padding: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .to-metric-label {
+      font-size: var(--font-xs);
+      font-weight: var(--weight-medium);
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .to-metric-value {
+      font-size: var(--font-2xl);
+      font-weight: var(--weight-bold);
+      font-variant-numeric: tabular-nums;
+      line-height: var(--leading-tight);
+    }
+
+    /* ── Modal ── */
+    .to-modal-demo {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-base);
+      width: 420px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .to-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .to-modal-title {
+      font-size: var(--font-md);
+      font-weight: var(--weight-semibold);
+    }
+
+    .to-modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-tertiary);
+      font-size: var(--font-lg);
+      cursor: pointer;
+      padding: var(--space-1);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+      line-height: 1;
+    }
+    .to-modal-close:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .to-modal-body {
+      padding: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .to-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-base);
+    }
+
+    /* ── Dropdown ── */
+    .to-dropdown-demo {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-base);
+      padding: var(--space-1);
+      box-shadow: var(--shadow-dropdown);
+      min-width: 140px;
+    }
+
+    .to-dropdown-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--font-sm);
+      font-family: var(--font-family);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+
+    .to-dropdown-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .to-dropdown-item.danger {
+      color: var(--status-danger);
+    }
+
+    .to-dropdown-sep {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: var(--space-1) 0;
+    }
+
+    /* ── Login ── */
+    .to-login-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-base);
+      width: 380px;
+      padding: var(--space-6);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+
+    .to-login-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .to-login-title {
+      font-size: var(--font-lg);
+      font-weight: var(--weight-bold);
+      letter-spacing: 0.5px;
+    }
+
+    .to-login-subtitle {
+      font-size: var(--font-sm);
+      color: var(--text-secondary);
+    }
+
+    .to-login-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .to-login-btn {
+      width: 100%;
+      padding: var(--space-3);
+      font-size: var(--font-base);
+      font-weight: var(--weight-semibold);
+    }
+
+    /* ── Sidebar (Agenda) ── */
+    .to-sidebar-demo {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-base);
+      width: var(--sidebar-width);
+      overflow: hidden;
+    }
+
+    .to-sidebar-header {
+      padding: var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .to-sidebar-title {
+      font-size: var(--font-md);
+      font-weight: var(--weight-bold);
+      margin-bottom: var(--space-3);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .to-search-box {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      background: var(--bg-base);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-base);
+      padding: var(--space-2) var(--space-3);
+    }
+
+    .to-search-box input {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      font-size: var(--font-sm);
+      outline: none;
+      flex: 1;
+    }
+
+    .to-search-icon {
+      color: var(--text-tertiary);
+      font-size: var(--font-base);
+    }
+
+    .to-sidebar-section {
+      padding: var(--space-3) var(--space-4);
+    }
+
+    .to-sidebar-section-title {
+      font-size: var(--font-xs);
+      font-weight: var(--weight-semibold);
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: var(--space-3);
+    }
+
+    .to-tecnico-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2);
+      border-radius: var(--radius-base);
+      transition: background var(--transition-fast);
+    }
+
+    .to-tecnico-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .to-tecnico-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .to-tecnico-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .to-tecnico-name {
+      font-size: var(--font-sm);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+    }
+
+    .to-tecnico-cargo {
+      font-size: var(--font-xs);
+      color: var(--text-tertiary);
+    }
+
+    .to-tecnico-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+
+    /* ── Spacing Visualization ── */
+    .spacing-demo {
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-3);
+    }
+    .spacing-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-1);
+    }
+    .spacing-block .bar {
+      background: var(--accent);
+      border-radius: 2px;
+      width: 24px;
+    }
+    .spacing-block .val {
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--text-tertiary);
+    }
+
+    /* ── Comparison Blocks ── */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-5);
+    }
+
+    .compare-card {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-base);
+      overflow: hidden;
+    }
+
+    .compare-label {
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--font-xs);
+      font-weight: var(--weight-semibold);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .compare-label.old {
+      background: var(--status-danger-subtle);
+      color: var(--status-danger);
+    }
+
+    .compare-label.new {
+      background: var(--status-success-subtle);
+      color: var(--status-success);
+    }
+
+    .compare-body {
+      padding: var(--space-4);
+    }
+
+    /* ── Kanban Board Preview ── */
+    .to-kanban-preview {
+      display: flex;
+      gap: var(--space-3);
+      overflow-x: auto;
+      padding-bottom: var(--space-2);
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-shell">
+
+    <!-- Banner -->
+    <div class="preview-banner">
+      PREVIEW — Design System "Titanium Ops" — Services Team Flow ERP
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Color Palette
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section">
+      <div class="section-label">Foundation</div>
+      <div class="section-title">Paleta Cromática</div>
+      <div class="section-desc">
+        Titanium Black + grafite para superfícies. Azul petróleo como cor de ação. Verde restrito a estados positivos. Sem neon, sem glow.
+      </div>
+
+      <div style="margin-bottom: var(--space-5);">
+        <div class="section-label" style="margin-bottom: var(--space-3);">Backgrounds</div>
+        <div class="grid-4">
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--bg-base);"><span class="swatch-label">Base</span></div>
+            <span class="swatch-code">#0C0E12</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--bg-surface);"><span class="swatch-label">Surface</span></div>
+            <span class="swatch-code">#13161B</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--bg-overlay);"><span class="swatch-label">Overlay</span></div>
+            <span class="swatch-code">#1A1D23</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--bg-elevated);"><span class="swatch-label">Elevated</span></div>
+            <span class="swatch-code">#21252D</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: var(--space-5);">
+        <div class="section-label" style="margin-bottom: var(--space-3);">Text & Borders</div>
+        <div class="grid-6">
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--text-primary);"><span class="swatch-label" style="color:#0C0E12;">Primary</span></div>
+            <span class="swatch-code">#E8ECF1</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--text-secondary);"><span class="swatch-label" style="color:#0C0E12;">Secondary</span></div>
+            <span class="swatch-code">#7A8494</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--text-tertiary);"><span class="swatch-label">Tertiary</span></div>
+            <span class="swatch-code">#4A5568</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--border-subtle);"><span class="swatch-label">Border Subtle</span></div>
+            <span class="swatch-code">#1E2229</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--border-default);"><span class="swatch-label">Border Default</span></div>
+            <span class="swatch-code">#252932</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--border-strong);"><span class="swatch-label">Border Strong</span></div>
+            <span class="swatch-code">#363D4A</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label" style="margin-bottom: var(--space-3);">Accent & Status</div>
+        <div class="grid-6">
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--accent);"><span class="swatch-label">Accent</span></div>
+            <span class="swatch-code">#2E6B8A</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--status-success);"><span class="swatch-label">Success</span></div>
+            <span class="swatch-code">#2D9B6A</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--status-warning);"><span class="swatch-label">Warning</span></div>
+            <span class="swatch-code">#C4841D</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--status-danger);"><span class="swatch-label">Danger</span></div>
+            <span class="swatch-code">#C43D3D</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--status-info);"><span class="swatch-label">Info</span></div>
+            <span class="swatch-code">#5B7FC4</span>
+          </div>
+          <div class="swatch-group">
+            <div class="swatch" style="background: var(--status-purple);"><span class="swatch-label">Purple</span></div>
+            <span class="swatch-code">#8B6CC1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Typography
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section">
+      <div class="section-label">Foundation</div>
+      <div class="section-title">Tipografia</div>
+      <div class="section-desc">
+        Inter em 6 tamanhos com hierarquia rígida. Pesos 400–700. Sem decoração tipográfica.
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+        <div style="display: flex; align-items: baseline; gap: var(--space-5);">
+          <span style="font-size: var(--font-xs); color: var(--text-tertiary); width: 40px; flex-shrink: 0;">11px</span>
+          <span style="font-size: var(--font-xs); font-weight: var(--weight-semibold); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px;">METADADO TERCIÁRIO · BADGE · LABEL COMPACTO</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: var(--space-5);">
+          <span style="font-size: var(--font-xs); color: var(--text-tertiary); width: 40px; flex-shrink: 0;">12px</span>
+          <span style="font-size: var(--font-sm); font-weight: var(--weight-medium); color: var(--text-secondary);">Label de campo · Timestamp · Subtítulo de card</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: var(--space-5);">
+          <span style="font-size: var(--font-xs); color: var(--text-tertiary); width: 40px; flex-shrink: 0;">13px</span>
+          <span style="font-size: var(--font-base); color: var(--text-primary);">Corpo de texto · Valor em card · Conteúdo de tabela</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: var(--space-5);">
+          <span style="font-size: var(--font-xs); color: var(--text-tertiary); width: 40px; flex-shrink: 0;">14px</span>
+          <span style="font-size: var(--font-md); font-weight: var(--weight-semibold); color: var(--text-primary);">Título de seção · Nome principal · Header de modal</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: var(--space-5);">
+          <span style="font-size: var(--font-xs); color: var(--text-tertiary); width: 40px; flex-shrink: 0;">16px</span>
+          <span style="font-size: var(--font-lg); font-weight: var(--weight-bold); color: var(--text-primary);">Título de coluna · Cabeçalho de página</span>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: var(--space-5);">
+          <span style="font-size: var(--font-xs); color: var(--text-tertiary); width: 40px; flex-shrink: 0;">20px</span>
+          <span style="font-size: var(--font-xl); font-weight: var(--weight-bold); color: var(--text-primary);">Título da Página</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Spacing
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section">
+      <div class="section-label">Foundation</div>
+      <div class="section-title">Grid de Espaçamento (8px)</div>
+      <div class="section-desc">
+        Todos os paddings, margins e gaps derivam desta escala. Sem valores arbitrários.
+      </div>
+      <div class="spacing-demo">
+        <div class="spacing-block"><div class="bar" style="height: 4px;"></div><span class="val">4</span></div>
+        <div class="spacing-block"><div class="bar" style="height: 8px;"></div><span class="val">8</span></div>
+        <div class="spacing-block"><div class="bar" style="height: 12px;"></div><span class="val">12</span></div>
+        <div class="spacing-block"><div class="bar" style="height: 16px;"></div><span class="val">16</span></div>
+        <div class="spacing-block"><div class="bar" style="height: 24px;"></div><span class="val">24</span></div>
+        <div class="spacing-block"><div class="bar" style="height: 32px;"></div><span class="val">32</span></div>
+        <div class="spacing-block"><div class="bar" style="height: 48px;"></div><span class="val">48</span></div>
+        <div class="spacing-block"><div class="bar" style="height: 64px;"></div><span class="val">64</span></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Header
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section">
+      <div class="section-label">Components</div>
+      <div class="section-title">Header (56px)</div>
+      <div class="section-desc">
+        Compacto, sem glow. Botões de navegação transparentes com hover sutil. Timeline integrada como progress bar minimalista.
+      </div>
+
+      <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-base); overflow: hidden;">
+        <div class="to-header">
+          <div class="to-header-left">
+            <div class="to-header-title">Services Team Flow</div>
+            <div class="to-nav-group" style="margin-left: var(--space-4);">
+              <button class="to-nav-btn active">Kanban</button>
+              <button class="to-nav-btn">Calculadora</button>
+              <button class="to-nav-btn">Clientes</button>
+            </div>
+          </div>
+
+          <div class="to-timeline">
+            <span class="to-time-label">08:30</span>
+            <div class="to-timeline-track">
+              <div class="to-timeline-fill"></div>
+            </div>
+            <span class="to-time-label">17:30</span>
+          </div>
+
+          <div class="to-header-right">
+            <div class="to-nav-group">
+              <button class="to-nav-btn">Agenda</button>
+              <button class="to-nav-btn">Importar</button>
+              <button class="to-nav-btn">Requisições</button>
+              <button class="to-nav-btn">Estoque</button>
+              <button class="to-nav-btn danger">Sair</button>
+            </div>
+            <div class="to-user-info">
+              <span class="to-greeting">Boa tarde, Ricardo</span>
+              <div class="to-avatar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Kanban Board
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section">
+      <div class="section-label">Components</div>
+      <div class="section-title">Kanban Board</div>
+      <div class="section-desc">
+        Colunas com borda sutil, contagem no header. Cards com hover suave, badges compactos com background de status. Sem glow neon.
+      </div>
+
+      <div class="to-kanban-preview">
+        <!-- Coluna Pendente -->
+        <div class="to-column" style="min-width: 340px;">
+          <div class="to-column-header">
+            <div class="to-column-header-left">
+              <div class="to-column-dot" style="background: var(--color-pendente);"></div>
+              <span class="to-column-title">Pendente</span>
+            </div>
+            <span class="to-column-count">3</span>
+          </div>
+          <div class="to-column-body">
+
+            <!-- Card Normal -->
+            <div class="to-card">
+              <div class="to-card-indicator" style="background: var(--color-pendente);"></div>
+              <div class="to-card-header">
+                <span class="to-card-id">#PD-0162</span>
+                <div class="to-card-tags">
+                  <span class="to-badge to-badge-status">PENDENTE</span>
+                  <button class="to-dots-btn">⋮</button>
+                </div>
+              </div>
+              <div class="to-card-tech">
+                <div class="to-card-tech-left">
+                  <div class="to-card-avatar"></div>
+                  <div>
+                    <div class="to-card-tech-label">Técnico</div>
+                    <div class="to-card-tech-name">Carlos Silva</div>
+                  </div>
+                </div>
+                <span class="to-card-role to-role-fse">FSE</span>
+              </div>
+              <div class="to-card-grid">
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Cliente</span>
+                  <span class="to-card-field-value">Gráfica Coan</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Máquina</span>
+                  <span class="to-card-field-value">HP 6900 - CIF</span>
+                </div>
+              </div>
+              <div class="to-card-bottom">
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Orçamento</span>
+                  <span class="to-card-field-value">N/A</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Pedido</span>
+                  <span class="to-card-field-value">N/A</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">NF</span>
+                  <span class="to-card-field-value">N/A</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card MD -->
+            <div class="to-card card-md">
+              <div class="to-card-indicator"></div>
+              <div class="to-card-header">
+                <span class="to-card-id">#PD-0154</span>
+                <div class="to-card-tags">
+                  <span class="to-badge to-badge-import">⚠ IMPORTAR</span>
+                  <span class="to-badge to-badge-status">PENDENTE</span>
+                  <button class="to-dots-btn">⋮</button>
+                </div>
+              </div>
+              <div class="to-card-tech">
+                <div class="to-card-tech-left">
+                  <div class="to-card-avatar"></div>
+                  <div>
+                    <div class="to-card-tech-label">Técnico</div>
+                    <div class="to-card-tech-name">Ismar</div>
+                  </div>
+                </div>
+                <span class="to-card-role to-role-fse">FSE</span>
+              </div>
+              <div class="to-card-grid">
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Cliente</span>
+                  <span class="to-card-field-value">OTIMA</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Máquina</span>
+                  <span class="to-card-field-value">HP 12K - CIF</span>
+                </div>
+              </div>
+              <div class="to-card-bottom">
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Orçamento</span>
+                  <span class="to-card-field-value">N/A</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Pedido</span>
+                  <span class="to-card-field-value">N/A</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">B.O.</span>
+                  <span class="to-card-field-value" style="color: var(--text-secondary);">Ricardo</span>
+                </div>
+              </div>
+              <div class="to-card-md-footer">⚠ MACHINE DOWN — PRIORIDADE MÁXIMA</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Coluna Em Análise -->
+        <div class="to-column" style="min-width: 340px;">
+          <div class="to-column-header">
+            <div class="to-column-header-left">
+              <div class="to-column-dot" style="background: var(--color-analise);"></div>
+              <span class="to-column-title">Em Análise</span>
+            </div>
+            <span class="to-column-count">2</span>
+          </div>
+          <div class="to-column-body">
+
+            <div class="to-card">
+              <div class="to-card-indicator" style="background: var(--color-analise);"></div>
+              <div class="to-card-header">
+                <span class="to-card-id">#PD-0158</span>
+                <div class="to-card-tags">
+                  <span class="to-badge to-badge-req">REQ-042</span>
+                  <span class="to-badge" style="background: rgba(217, 115, 51, 0.12); color: #D97333;">EM ANÁLISE</span>
+                  <button class="to-dots-btn">⋮</button>
+                </div>
+              </div>
+              <div class="to-card-tech">
+                <div class="to-card-tech-left">
+                  <div class="to-card-avatar"></div>
+                  <div>
+                    <div class="to-card-tech-label">Técnico</div>
+                    <div class="to-card-tech-name">Marcos Oliveira</div>
+                  </div>
+                </div>
+                <span class="to-card-role to-role-rse">RSE</span>
+              </div>
+              <div class="to-card-grid">
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Cliente</span>
+                  <span class="to-card-field-value">PackPrint SP</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Máquina</span>
+                  <span class="to-card-field-value">HP 25K</span>
+                </div>
+              </div>
+              <div class="to-card-bottom">
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Orçamento</span>
+                  <span class="to-card-field-value">N/A</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Pedido</span>
+                  <span class="to-card-field-value">N/A</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">NF</span>
+                  <span class="to-card-field-value">N/A</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Coluna Aprovado -->
+        <div class="to-column" style="min-width: 340px;">
+          <div class="to-column-header">
+            <div class="to-column-header-left">
+              <div class="to-column-dot" style="background: var(--color-oaprov);"></div>
+              <span class="to-column-title">O. Aprovado</span>
+            </div>
+            <span class="to-column-count">1</span>
+          </div>
+          <div class="to-column-body">
+
+            <div class="to-card">
+              <div class="to-card-indicator" style="background: var(--color-oaprov);"></div>
+              <div class="to-card-header">
+                <span class="to-card-id">#PD-0145</span>
+                <div class="to-card-tags">
+                  <span class="to-badge to-badge-info">APROVADO</span>
+                  <button class="to-dots-btn">⋮</button>
+                </div>
+              </div>
+              <div class="to-card-tech">
+                <div class="to-card-tech-left">
+                  <div class="to-card-avatar"></div>
+                  <div>
+                    <div class="to-card-tech-label">Técnico</div>
+                    <div class="to-card-tech-name">André Santos</div>
+                  </div>
+                </div>
+                <span class="to-card-role to-role-cc">CC</span>
+              </div>
+              <div class="to-card-grid">
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Cliente</span>
+                  <span class="to-card-field-value">Bemvindo Emb.</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Máquina</span>
+                  <span class="to-card-field-value">HP 7800</span>
+                </div>
+              </div>
+              <div class="to-card-bottom">
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Orçamento</span>
+                  <span class="to-card-field-value">ORC-7721</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Pedido</span>
+                  <span class="to-card-field-value">PED-3301</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">NF</span>
+                  <span class="to-card-field-value">N/A</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Coluna Finalizado -->
+        <div class="to-column" style="min-width: 340px;">
+          <div class="to-column-header">
+            <div class="to-column-header-left">
+              <div class="to-column-dot" style="background: var(--color-finalizado);"></div>
+              <span class="to-column-title">Finalizado</span>
+            </div>
+            <span class="to-column-count">5</span>
+          </div>
+          <div class="to-column-body">
+
+            <div class="to-card">
+              <div class="to-card-indicator" style="background: var(--color-finalizado);"></div>
+              <div class="to-card-header">
+                <span class="to-card-id">#PD-0139</span>
+                <div class="to-card-tags">
+                  <span class="to-badge to-badge-success">FINALIZADO</span>
+                  <button class="to-dots-btn">⋮</button>
+                </div>
+              </div>
+              <div class="to-card-tech">
+                <div class="to-card-tech-left">
+                  <div class="to-card-avatar"></div>
+                  <div>
+                    <div class="to-card-tech-label">Técnico</div>
+                    <div class="to-card-tech-name">Felipe Ramos</div>
+                  </div>
+                </div>
+                <span class="to-card-role to-role-bo">B.O</span>
+              </div>
+              <div class="to-card-grid">
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Cliente</span>
+                  <span class="to-card-field-value">Trident Gráfica</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Máquina</span>
+                  <span class="to-card-field-value">HP 6900</span>
+                </div>
+              </div>
+              <div class="to-card-bottom">
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Orçamento</span>
+                  <span class="to-card-field-value">ORC-7688</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">Pedido</span>
+                  <span class="to-card-field-value">PED-3290</span>
+                </div>
+                <div class="to-card-field">
+                  <span class="to-card-field-label">NF</span>
+                  <span class="to-card-field-value">NF-44021</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Badges
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section">
+      <div class="section-label">Components</div>
+      <div class="section-title">Badges</div>
+      <div class="section-desc">
+        Sem borda chamativa. Background sutil com cor do status. Raio de 3px.
+      </div>
+
+      <div class="row-tight" style="gap: var(--space-3);">
+        <span class="to-badge to-badge-status">EM ANÁLISE</span>
+        <span class="to-badge to-badge-import">⚠ IMPORTAR</span>
+        <span class="to-badge to-badge-req">REQ-042</span>
+        <span class="to-badge to-badge-danger">REPROVADO</span>
+        <span class="to-badge to-badge-success">FINALIZADO</span>
+        <span class="to-badge to-badge-info">APROVADO</span>
+        <span class="to-badge" style="background: rgba(217, 115, 51, 0.12); color: #D97333;">PENDENTE</span>
+        <span class="to-badge" style="background: var(--status-purple-subtle); color: var(--status-purple);">O. ENVIADO</span>
+      </div>
+
+      <div style="margin-top: var(--space-4);">
+        <div class="section-label" style="margin-bottom: var(--space-3);">Role Badges</div>
+        <div class="row-tight" style="gap: var(--space-3);">
+          <span class="to-card-role to-role-fse">FSE</span>
+          <span class="to-card-role to-role-rse">RSE</span>
+          <span class="to-card-role to-role-cc">CC</span>
+          <span class="to-card-role to-role-bo">B.O</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Buttons
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section">
+      <div class="section-label">Components</div>
+      <div class="section-title">Botões</div>
+      <div class="section-desc">
+        Flat, sem gradiente, sem glow. Hover com mudança de luminosidade. Raio 6px.
+      </div>
+
+      <div class="row" style="gap: var(--space-4);">
+        <button class="to-btn to-btn-primary">Calcular Valor</button>
+        <button class="to-btn to-btn-secondary">Cancelar</button>
+        <button class="to-btn to-btn-ghost">Voltar</button>
+        <button class="to-btn to-btn-success">✓ Peças Chegaram</button>
+        <button class="to-btn to-btn-warning">Enviar Selecionadas</button>
+        <button class="to-btn to-btn-danger">Reprovar</button>
+      </div>
+      <div class="row" style="gap: var(--space-4); margin-top: var(--space-3);">
+        <button class="to-btn to-btn-primary to-btn-sm">Salvar</button>
+        <button class="to-btn to-btn-secondary to-btn-sm">Cancelar</button>
+        <button class="to-btn to-btn-ghost to-btn-sm">Ver todos</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Form Controls
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section">
+      <div class="section-label">Components</div>
+      <div class="section-title">Controles de Formulário</div>
+      <div class="section-desc">
+        Inputs com fundo base, bordas definidas, foco com ring azul petróleo. Sem blur nem glow verde.
+      </div>
+
+      <div style="display: flex; gap: var(--space-5); max-width: 640px;">
+        <div class="to-form-group" style="flex: 1;">
+          <label class="to-form-label">Valor FOB</label>
+          <input type="text" class="to-input" placeholder="0.00">
+        </div>
+        <div class="to-form-group" style="flex: 1;">
+          <label class="to-form-label">Moeda</label>
+          <select class="to-select">
+            <option>USD - Dólar</option>
+            <option>EUR - Euro</option>
+            <option>GBP - Libra</option>
+          </select>
+        </div>
+        <div class="to-form-group" style="flex: 1;">
+          <label class="to-form-label">Modalidade</label>
+          <select class="to-select">
+            <option>Pronta Entrega</option>
+            <option>Importação</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Dropdown & Modal
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section">
+      <div class="section-label">Components</div>
+      <div class="section-title">Dropdown & Modal</div>
+
+      <div class="row" style="gap: var(--space-7); align-items: flex-start;">
+        <!-- Dropdown -->
+        <div>
+          <div class="section-desc" style="margin-bottom: var(--space-3);">
+            Menu de ações do card (3 pontinhos). Shadow definida, sem glow.
+          </div>
+          <div class="to-dropdown-demo">
+            <button class="to-dropdown-item">Importação</button>
+            <button class="to-dropdown-item">Requisição</button>
+            <div class="to-dropdown-sep"></div>
+            <button class="to-dropdown-item danger">Reprovar</button>
+          </div>
+        </div>
+
+        <!-- Modal -->
+        <div>
+          <div class="section-desc" style="margin-bottom: var(--space-3);">
+            Modal de formulário. Header com borda, footer com fundo base.
+          </div>
+          <div class="to-modal-demo">
+            <div class="to-modal-header">
+              <span class="to-modal-title">Nova Requisição</span>
+              <button class="to-modal-close">✕</button>
+            </div>
+            <div class="to-modal-body">
+              <div class="to-form-group">
+                <label class="to-form-label">Nº da Requisição</label>
+                <input type="text" class="to-input" placeholder="REQ-000">
+              </div>
+              <div class="to-form-group">
+                <label class="to-form-label">Técnico / Mala</label>
+                <select class="to-select">
+                  <option>Selecione...</option>
+                </select>
+              </div>
+              <div style="display: flex; gap: var(--space-3);">
+                <div class="to-form-group" style="flex: 1;">
+                  <label class="to-form-label">Cliente</label>
+                  <input type="text" class="to-input" value="OTIMA" disabled style="opacity: 0.5;">
+                </div>
+                <div class="to-form-group" style="flex: 1;">
+                  <label class="to-form-label">Valor (R$)</label>
+                  <input type="text" class="to-input" placeholder="0,00">
+                </div>
+              </div>
+            </div>
+            <div class="to-modal-footer">
+              <button class="to-btn to-btn-secondary">Cancelar</button>
+              <button class="to-btn to-btn-primary">Salvar Requisição</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Table
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section">
+      <div class="section-label">Components</div>
+      <div class="section-title">Tabela (Importações / Requisições)</div>
+      <div class="section-desc">
+        Header denso, hover sutil, tipografia compacta. Ações inline com botões small.
+      </div>
+
+      <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-base); overflow: hidden;">
+        <table class="to-table">
+          <thead>
+            <tr>
+              <th>ID Pedido</th>
+              <th>PO</th>
+              <th>ETA</th>
+              <th>Cliente / Máquina</th>
+              <th>Técnico</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight: var(--weight-semibold);">#PDI-0154</td>
+              <td><input type="text" class="to-input" value="PO-88231" style="width: 100px; padding: 4px 8px; font-size: var(--font-xs);"></td>
+              <td><input type="text" class="to-input" placeholder="DD/MM" style="width: 80px; padding: 4px 8px; font-size: var(--font-xs);"></td>
+              <td>
+                <div style="font-weight: var(--weight-semibold);">OTIMA</div>
+                <div class="to-table-text-muted">HP 12K - CIF</div>
+              </td>
+              <td>Ismar</td>
+              <td><span class="to-badge to-badge-import">Em Importação</span></td>
+              <td><button class="to-btn to-btn-success to-btn-sm">✓ Peças Chegaram</button></td>
+            </tr>
+            <tr>
+              <td style="font-weight: var(--weight-semibold);">#PDI-0161</td>
+              <td><input type="text" class="to-input" placeholder="Inserir PO" style="width: 100px; padding: 4px 8px; font-size: var(--font-xs);"></td>
+              <td><input type="text" class="to-input" placeholder="DD/MM" style="width: 80px; padding: 4px 8px; font-size: var(--font-xs);"></td>
+              <td>
+                <div style="font-weight: var(--weight-semibold);">Gráfica Coan</div>
+                <div class="to-table-text-muted">HP 6900</div>
+              </td>
+              <td>Carlos Silva</td>
+              <td><span class="to-badge to-badge-import">Em Importação</span></td>
+              <td><button class="to-btn to-btn-success to-btn-sm">✓ Peças Chegaram</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Metrics Cards
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section">
+      <div class="section-label">Components</div>
+      <div class="section-title">Cards de Métricas (Requisições)</div>
+
+      <div class="grid-4">
+        <div class="to-metric">
+          <span class="to-metric-label">Pendentes</span>
+          <span class="to-metric-value" style="color: var(--text-primary);">12</span>
+        </div>
+        <div class="to-metric">
+          <span class="to-metric-label">Baixadas / Retornadas</span>
+          <span class="to-metric-value" style="color: var(--status-success);">47</span>
+        </div>
+        <div class="to-metric">
+          <span class="to-metric-label">Valor Total Pendente</span>
+          <span class="to-metric-value" style="color: var(--status-warning);">R$ 24.530</span>
+        </div>
+        <div class="to-metric">
+          <span class="to-metric-label">Meta Mensal</span>
+          <span class="to-metric-value" style="color: var(--accent-hover);">78%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Sidebar (Agenda)
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section">
+      <div class="section-label">Components</div>
+      <div class="section-title">Sidebar — Agenda</div>
+      <div class="section-desc">
+        Lista de técnicos compacta, busca integrada, seções com títulos discretos.
+      </div>
+
+      <div class="to-sidebar-demo">
+        <div class="to-sidebar-header">
+          <div class="to-sidebar-title">Agenda Dinâmica</div>
+          <div class="to-search-box">
+            <span class="to-search-icon">⌕</span>
+            <input type="text" placeholder="Buscar técnico...">
+          </div>
+        </div>
+        <div class="to-sidebar-section">
+          <div class="to-sidebar-section-title">Disponíveis (18)</div>
+          <div style="display: flex; flex-direction: column; gap: var(--space-1);">
+            <div class="to-tecnico-item">
+              <div class="to-tecnico-avatar"></div>
+              <div class="to-tecnico-info">
+                <div class="to-tecnico-name">Carlos Silva</div>
+                <div class="to-tecnico-cargo">FSE · São Paulo</div>
+              </div>
+              <div class="to-tecnico-dot" style="background: var(--status-success);"></div>
+            </div>
+            <div class="to-tecnico-item">
+              <div class="to-tecnico-avatar"></div>
+              <div class="to-tecnico-info">
+                <div class="to-tecnico-name">Marcos Oliveira</div>
+                <div class="to-tecnico-cargo">RSE · Campinas</div>
+              </div>
+              <div class="to-tecnico-dot" style="background: var(--status-success);"></div>
+            </div>
+            <div class="to-tecnico-item">
+              <div class="to-tecnico-avatar"></div>
+              <div class="to-tecnico-info">
+                <div class="to-tecnico-name">André Santos</div>
+                <div class="to-tecnico-cargo">CC · Curitiba</div>
+              </div>
+              <div class="to-tecnico-dot" style="background: var(--status-success);"></div>
+            </div>
+          </div>
+        </div>
+        <div class="to-sidebar-section" style="border-top: 1px solid var(--border-subtle);">
+          <div class="to-sidebar-section-title" style="color: var(--status-danger);">Indisponíveis (12)</div>
+          <div style="display: flex; flex-direction: column; gap: var(--space-1);">
+            <div class="to-tecnico-item">
+              <div class="to-tecnico-avatar"></div>
+              <div class="to-tecnico-info">
+                <div class="to-tecnico-name">Ismar</div>
+                <div class="to-tecnico-cargo">FSE · Férias</div>
+              </div>
+              <div class="to-tecnico-dot" style="background: var(--status-danger);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         SECTION: Login
+         ═══════════════════════════════════════════ -->
+    <div class="preview-section" style="display: flex; flex-direction: column; align-items: center;">
+      <div style="width: 100%; max-width: 800px;">
+        <div class="section-label">Pages</div>
+        <div class="section-title">Tela de Login</div>
+        <div class="section-desc">
+          Container compacto, raio 6px, tipografia sem decoração. Botão flat com accent color.
+        </div>
+      </div>
+
+      <div class="to-login-container" style="margin-top: var(--space-4);">
+        <div class="to-login-header">
+          <div class="to-login-title">Services Team Backoffice</div>
+          <div class="to-login-subtitle">Acesso restrito · Comprint</div>
+        </div>
+        <div class="to-login-form">
+          <div class="to-form-group">
+            <label class="to-form-label">E-mail Corporativo</label>
+            <input type="email" class="to-input" placeholder="nome@comprint.com.br">
+          </div>
+          <div class="to-form-group">
+            <label class="to-form-label">Senha</label>
+            <input type="password" class="to-input" placeholder="••••••••">
+          </div>
+          <button class="to-btn to-btn-primary to-login-btn">Entrar no Sistema</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="padding: var(--space-6) var(--space-7); text-align: center; border-top: 1px solid var(--border-subtle);">
+      <span style="font-size: var(--font-xs); color: var(--text-tertiary);">
+        TITANIUM OPS — Design System Preview · Services Team Flow ERP · Comprint © 2026
+      </span>
+    </div>
+
+  </div>
+</body>
+</html>

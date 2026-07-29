@@ -1,0 +1,136 @@
+/* ============================================
+   DESIGN TOKENS — "Titanium Ops"
+   Services Team Flow ERP
+   Grid: 8px | Radius: 6px | Font: Inter
+   ============================================ */
+
+:root {
+  /* ── Backgrounds ── */
+  --bg-base: #0C0E12;
+  --bg-surface: #13161B;
+  --bg-overlay: #1A1D23;
+  --bg-elevated: #21252D;
+  --bg-hover: rgba(255, 255, 255, 0.04);
+  --bg-active: rgba(255, 255, 255, 0.06);
+
+  /* ── Borders ── */
+  --border-subtle: #1E2229;
+  --border-default: #252932;
+  --border-strong: #363D4A;
+
+  /* ── Text ── */
+  --text-primary: #E8ECF1;
+  --text-secondary: #7A8494;
+  --text-tertiary: #4A5568;
+  --text-inverse: #0C0E12;
+
+  /* ── Accent (Azul Petróleo) ── */
+  --accent: #2E6B8A;
+  --accent-hover: #367FA3;
+  --accent-subtle: rgba(46, 107, 138, 0.12);
+  --accent-muted: rgba(46, 107, 138, 0.25);
+
+  /* ── Status ── */
+  --status-success: #2D9B6A;
+  --status-success-subtle: rgba(45, 155, 106, 0.12);
+  --status-warning: #C4841D;
+  --status-warning-subtle: rgba(196, 132, 29, 0.12);
+  --status-danger: #C43D3D;
+  --status-danger-subtle: rgba(196, 61, 61, 0.12);
+  --status-info: #5B7FC4;
+  --status-info-subtle: rgba(91, 127, 196, 0.12);
+  --status-purple: #8B6CC1;
+  --status-purple-subtle: rgba(139, 108, 193, 0.12);
+
+  /* ── Kanban Status Colors ── */
+  --color-pendente: #C4841D;
+  --color-analise: #D97333;
+  --color-oenv: #8B6CC1;
+  --color-oaprov: #5B7FC4;
+  --color-separacao: #C4841D;
+  --color-finalizado: #2D9B6A;
+
+  /* ── Typography ── */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-xs: 11px;
+  --font-sm: 12px;
+  --font-base: 13px;
+  --font-md: 14px;
+  --font-lg: 16px;
+  --font-xl: 20px;
+  --font-2xl: 24px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+
+  /* ── Spacing (8px grid) ── */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* ── Radii ── */
+  --radius-sm: 3px;
+  --radius-base: 6px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-dropdown: 0 4px 16px rgba(0, 0, 0, 0.6);
+
+  /* ── Transitions ── */
+  --transition-fast: 80ms ease;
+  --transition-base: 120ms ease;
+  --transition-slow: 200ms ease;
+
+  /* ── Layout ── */
+  --header-height: 56px;
+  --sidebar-width: 260px;
+  --column-min-width: 320px;
+  --icon-size: 18px;
+}
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-base);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  background-color: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
