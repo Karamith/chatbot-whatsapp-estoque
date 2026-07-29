@@ -439,8 +439,8 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(data => {
       if (!data.success) {
         alert('Erro ao atualizar status do pedido');
-        fetchPedidos();
       }
+      fetchPedidos();
     })
     .catch(err => {
       console.error('Erro:', err);

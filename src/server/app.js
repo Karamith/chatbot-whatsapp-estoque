@@ -478,7 +478,16 @@ app.put('/api/pedidos/:id/status', authenticateToken, async (req, res) => {
 
   try {
     const pedidoAntigo = queries.buscarPedidoPorId(id);
-    queries.atualizarStatusPedido(id, status, { numero_orcamento, numero_pedido_protheus, nota_fiscal });
+    
+    let responsavel_baixa = undefined;
+    // Se o pedido estava PENDENTE e agora foi puxado para EM_ANALISE, atribuímos ao usuário logado
+    if (status === 'EM_ANALISE' && pedidoAntigo && pedidoAntigo.status_pedido === 'PENDENTE') {
+      const email = req.user.usuario || '';
+      const namePart = email.split('@')[0];
+      responsavel_baixa = namePart.split('.').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'Backoffice';
+    }
+
+    queries.atualizarStatusPedido(id, status, { numero_orcamento, numero_pedido_protheus, nota_fiscal, responsavel_baixa });
 
     if (pedidoAntigo && pedidoAntigo.status_pedido !== status) {
       const client = getClient();

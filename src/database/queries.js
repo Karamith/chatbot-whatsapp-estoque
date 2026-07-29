@@ -320,10 +320,15 @@ function buscarPedidos() {
 }
 
 function atualizarStatusPedido(id, status, extra = {}) {
-  const { numero_orcamento, numero_pedido_protheus, nota_fiscal } = extra;
+  const { numero_orcamento, numero_pedido_protheus, nota_fiscal, responsavel_baixa } = extra;
   
   let query = 'UPDATE solicitacoes SET status_pedido = ?';
   const params = [status];
+  
+  if (responsavel_baixa !== undefined && responsavel_baixa !== null) {
+    query += ', responsavel_baixa = ?';
+    params.push(responsavel_baixa);
+  }
   
   if (numero_orcamento !== undefined && numero_orcamento !== null) {
     query += ', numero_orcamento = ?';
