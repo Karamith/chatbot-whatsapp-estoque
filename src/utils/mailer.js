@@ -8,7 +8,7 @@ let transporter = null;
 
 if (config.SMTP_USER && config.SMTP_PASS) {
   transporter = nodemailer.createTransport({
-    host: 'smtp.office365.com',
+    host: 'smtp.gmail.com',
     port: 587,
     secure: false, // true para 465, false para outras portas
     requireTLS: true,
