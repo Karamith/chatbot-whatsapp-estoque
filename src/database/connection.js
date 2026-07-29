@@ -507,36 +507,34 @@ function inicializarJigsETecnicos() {
       }
     }
 
-  const totalBackoffice = getScalar('SELECT COUNT(*) AS total FROM backoffice') || 0;
-  if (totalBackoffice === 0) {
-    const backofficePath = path.join(__dirname, '../../data/backoffice/backoffice.xlsx');
-    if (fs.existsSync(backofficePath)) {
-      console.log('Inicializando tabela backoffice a partir do Excel...');
-      try {
-        const wb = xlsx.readFile(backofficePath);
-        const sheetName = wb.SheetNames[0];
-        const dados = xlsx.utils.sheet_to_json(wb.Sheets[sheetName]);
-        
-        db.run('BEGIN TRANSACTION');
-        dados.forEach(row => {
-          if (row['NOME']) {
-            run(`
-              INSERT INTO backoffice (nome, telefone, email, acesso)
-              VALUES (?, ?, ?, ?)
-            `, [
-              String(row['NOME']).trim(),
-              row['TELEFONE'] ? String(row['TELEFONE']).trim() : null,
-              row['EMAIL'] ? String(row['EMAIL']).trim() : null,
-              row['ACESSO'] ? String(row['ACESSO']).trim() : null
-            ]);
-          }
-        });
-        db.run('COMMIT');
-        console.log('Tabela backoffice inicializada com sucesso.');
-      } catch (e) {
-        try { db.run('ROLLBACK'); } catch (_) {}
-        console.error('Erro ao inicializar backoffice:', e.message);
-      }
+  const backofficePath = path.join(__dirname, '../../data/backoffice/backoffice.xlsx');
+  if (fs.existsSync(backofficePath)) {
+    console.log('Inicializando/Atualizando tabela backoffice a partir do Excel...');
+    try {
+      const wb = xlsx.readFile(backofficePath);
+      const sheetName = wb.SheetNames[0];
+      const dados = xlsx.utils.sheet_to_json(wb.Sheets[sheetName]);
+      
+      db.run('BEGIN TRANSACTION');
+      db.run('DELETE FROM backoffice');
+      dados.forEach(row => {
+        if (row['NOME']) {
+          run(`
+            INSERT INTO backoffice (nome, telefone, email, acesso)
+            VALUES (?, ?, ?, ?)
+          `, [
+            String(row['NOME']).trim(),
+            row['TELEFONE'] ? String(row['TELEFONE']).trim() : null,
+            row['EMAIL'] ? String(row['EMAIL']).trim() : null,
+            row['ACESSO'] ? String(row['ACESSO']).trim() : null
+          ]);
+        }
+      });
+      db.run('COMMIT');
+      console.log('Tabela backoffice atualizada com sucesso.');
+    } catch (e) {
+      try { db.run('ROLLBACK'); } catch (_) {}
+      console.error('Erro ao inicializar backoffice:', e.message);
     }
   }
 }
