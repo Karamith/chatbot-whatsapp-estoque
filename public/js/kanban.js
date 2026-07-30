@@ -584,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInputs.forEach(input => {
       const searchText = input.value.toLowerCase().trim();
       const column = input.closest('.kanban-column');
-      const cards = column.querySelectorAll('.kanban-card');
+      const cards = column.querySelectorAll('.bo-card');
 
       if (searchText !== '') {
         hasAnyFilter = true;
