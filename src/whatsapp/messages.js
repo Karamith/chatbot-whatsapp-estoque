@@ -12,7 +12,7 @@ const MESSAGES = {
     return `${saudacao}, ${nome}!\n\n1 - ESTOQUE\n2 - REQUISITAR JIGS\n3 - DEVOLVER JIGS\n4 - REPOSIÇÕES\n\nResponda com o número desejado.`;
   },
 
-  MENU_ESTOQUE_PROMPT: "Por favor, insira o código ou descrição da peça que deseja pesquisar.",
+  MENU_ESTOQUE_PROMPT: "Por favor, insira o código da peça que deseja pesquisar.",
 
   JIGS_REQ_LIST: (lista) => `Estas são as JIGs cadastradas:\n\n${lista}\nQual JIG você deseja requisitar? Digite o CÓD. CP correspondente.`,
   

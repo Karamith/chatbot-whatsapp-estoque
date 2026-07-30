@@ -98,21 +98,8 @@ async function handleMenuEstoque(sessao, texto, client, telefone) {
     return;
   }
 
-  // Se não achou por código, tenta por descrição
-  const resultadosDescricao = search.buscarPorDescricao(texto);
+  // Não achou por código
 
-  if (resultadosDescricao.length > 0) {
-    let listaTexto = '';
-    resultadosDescricao.forEach((res, index) => {
-      listaTexto += `${index + 1} - ${res.codigo} - ${res.descricao} (${res.quantidade} un.)\n`;
-    });
-
-    enviarMensagem(client, telefone, MSG.SEARCH_RESULTS(listaTexto));
-    session.setEstado(sessao.id, 'aguardando_codigo'); // aguarda ele digitar o codigo exato ou 0
-    return;
-  }
-
-  // Não achou nem por código nem por descrição
   session.historicoConsulta(sessao.id, 'busca_unificada', texto, 'nao_encontrado');
   
   const tentativas = session.incrementarTentativasBusca(sessao.id, sessao.tentativas_busca);
