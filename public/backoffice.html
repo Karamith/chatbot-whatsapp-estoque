@@ -46,6 +46,7 @@
         <button class="bo-nav-btn" id="btn-menu-3" onclick="window.location.href='agenda.html'"><img src="/bo-assets/Agenda.png" alt="Agenda" class="nav-icon-img"> Agenda</button>
         <button class="bo-nav-btn" id="btn-menu-4" onclick="window.location.href='importacoes.html'"><span class="nav-icon">✈️</span> Importar</button>
         <button class="bo-nav-btn" id="btn-menu-req" onclick="window.location.href='requisicoes.html'"><span class="nav-icon">📦</span> Requisições</button>
+        <button class="bo-nav-btn" id="btn-clear-filters" style="display: none;"><span class="nav-icon">🧹</span> Limpar</button>
         <button class="bo-nav-btn" id="btn-upload-estoque"><span class="nav-icon">⬆️</span> Estoque</button>
         <button class="bo-nav-btn" id="btn-sair" onclick="logout()" style="color: #ef4444;"><span class="nav-icon">🚪</span> Sair</button>
         <input type="file" id="file-upload-estoque" accept=".xlsx" style="display: none;">
@@ -67,6 +68,9 @@
         <div class="dot"></div>
         <div class="column-title">Pendente</div>
       </div>
+      <div class="column-search-container" style="padding: 0 16px 8px 16px;">
+        <input type="text" class="kanban-col-search" placeholder="Filtrar (Ped, Orç, NF...)" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #374151; background: #1F2229; color: #fff; font-size: 0.75rem; outline: none;">
+      </div>
       <div class="column-body">
         <!-- Cards will go here -->
       </div>
@@ -77,6 +81,9 @@
       <div class="column-header">
         <div class="dot"></div>
         <div class="column-title">Em Análise</div>
+      </div>
+      <div class="column-search-container" style="padding: 0 16px 8px 16px;">
+        <input type="text" class="kanban-col-search" placeholder="Filtrar (Ped, Orç, NF...)" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #374151; background: #1F2229; color: #fff; font-size: 0.75rem; outline: none;">
       </div>
       <div class="column-body">
         <!-- Cards will go here -->
@@ -89,6 +96,9 @@
         <div class="dot"></div>
         <div class="column-title">O. Env.</div>
       </div>
+      <div class="column-search-container" style="padding: 0 16px 8px 16px;">
+        <input type="text" class="kanban-col-search" placeholder="Filtrar (Ped, Orç, NF...)" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #374151; background: #1F2229; color: #fff; font-size: 0.75rem; outline: none;">
+      </div>
       <div class="column-body">
         <!-- Cards will go here -->
       </div>
@@ -99,6 +109,9 @@
       <div class="column-header">
         <div class="dot"></div>
         <div class="column-title">O. Aprov.</div>
+      </div>
+      <div class="column-search-container" style="padding: 0 16px 8px 16px;">
+        <input type="text" class="kanban-col-search" placeholder="Filtrar (Ped, Orç, NF...)" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #374151; background: #1F2229; color: #fff; font-size: 0.75rem; outline: none;">
       </div>
       <div class="column-body">
         <!-- Cards will go here -->
@@ -111,6 +124,9 @@
         <div class="dot" style="background-color: var(--color-separacao);"></div>
         <div class="column-title">Em processamento</div>
       </div>
+      <div class="column-search-container" style="padding: 0 16px 8px 16px;">
+        <input type="text" class="kanban-col-search" placeholder="Filtrar (Ped, Orç, NF...)" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #374151; background: #1F2229; color: #fff; font-size: 0.75rem; outline: none;">
+      </div>
       <div class="column-body">
         <!-- Cards will go here -->
       </div>
@@ -121,6 +137,9 @@
       <div class="column-header">
         <div class="dot"></div>
         <div class="column-title">Finalizado</div>
+      </div>
+      <div class="column-search-container" style="padding: 0 16px 8px 16px;">
+        <input type="text" class="kanban-col-search" placeholder="Filtrar (Ped, Orç, NF...)" style="width: 100%; padding: 6px 10px; border-radius: 6px; border: 1px solid #374151; background: #1F2229; color: #fff; font-size: 0.75rem; outline: none;">
       </div>
       <div class="column-body">
         <!-- Cards will go here -->

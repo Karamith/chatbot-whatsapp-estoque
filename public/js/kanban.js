@@ -332,6 +332,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
+
+    if (typeof window.applyColumnFilters === 'function') {
+      window.applyColumnFilters();
+    }
   }
 
   let draggedCard = null;
@@ -569,3 +573,50 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
 });
+
+  // --- Lógica de Filtro nas Colunas do Kanban ---
+  const searchInputs = document.querySelectorAll('.kanban-col-search');
+  const btnClearFilters = document.getElementById('btn-clear-filters');
+
+  window.applyColumnFilters = function() {
+    let hasAnyFilter = false;
+
+    searchInputs.forEach(input => {
+      const searchText = input.value.toLowerCase().trim();
+      const column = input.closest('.kanban-column');
+      const cards = column.querySelectorAll('.kanban-card');
+
+      if (searchText !== '') {
+        hasAnyFilter = true;
+      }
+
+      cards.forEach(card => {
+        if (searchText === '') {
+          card.style.display = '';
+        } else {
+          const cardText = card.innerText.toLowerCase();
+          if (cardText.includes(searchText)) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        }
+      });
+    });
+
+    if (btnClearFilters) {
+      btnClearFilters.style.display = hasAnyFilter ? 'inline-flex' : 'none';
+    }
+  };
+
+  searchInputs.forEach(input => {
+    input.addEventListener('input', window.applyColumnFilters);
+  });
+
+  if (btnClearFilters) {
+    btnClearFilters.addEventListener('click', () => {
+      searchInputs.forEach(input => input.value = '');
+      window.applyColumnFilters();
+    });
+  }
+  // ----------------------------------------------
