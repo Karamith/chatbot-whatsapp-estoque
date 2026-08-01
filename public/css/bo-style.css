@@ -101,11 +101,10 @@ body {
 
 /* Timeline (Expediente) */
 .bo-timeline-container {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 40px;
+  margin: 16px 40px 0 40px;
   gap: 16px;
 }
 
