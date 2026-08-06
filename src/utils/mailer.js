@@ -134,7 +134,7 @@ async function enviarEmailPedido(to, sessao, solicitacaoId, resumoTexto, nomeAdm
       
       <!-- HEADER -->
       <div style="background-color: #1e6e28; padding: 25px 20px; text-align: center;">
-        <img src="cid:mascotelogo" style="max-width: 120px; border-radius: 8px; border: 2px solid #2ecc71;">
+        <img src="cid:mascotelogo" width="120" style="max-width: 120px; border-radius: 8px; border: 2px solid #2ecc71;">
         <h2 style="color: #ffffff; margin: 15px 0 0 0; font-family: Arial, sans-serif; font-size: 22px;">Novo Pedido de Peças (#PD-${solicitacaoId})</h2>
       </div>
       
